@@ -1,12 +1,19 @@
 # StockWebsite
 
-A website that allows people to get live updates of stocks, and test out their algorithms to trade and see how they fare.
+This is a python based tool for training and viewing performance of different models.
 
 ## Planned Features
 
-1. Searching and viewing stock details
-2. Live share prices
-3. Downloading stock data
-4. Platform to test out model
-5. Displays performance of your model
-6. Good Charting Libraries
+1. Updated NSE Indices
+2. Choose a set of stocks to train a model on
+3. View the performance of the model
+4. Automated Trading:
+    - Either by scraping Zerodha Kite or
+    - By sending you notifications on when to buy/sell
+
+
+## Requirements
+
+1. plotly dash
+2. selenium
+3. phantomjs driver

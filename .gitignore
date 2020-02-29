@@ -3,3 +3,7 @@
 __pycache__
 CONFIG.py
 app.py
+*[tT]est*
+geckodriver*
+phantomjs*
+Indices/
