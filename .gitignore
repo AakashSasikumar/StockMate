@@ -7,4 +7,5 @@ app.py
 geckodriver*
 phantomjs*
 Indices/
-DataStore/StockData
+DataStore/StockData*
+*TODO*

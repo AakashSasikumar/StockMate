@@ -2,7 +2,7 @@ from DataStore.APIInterface import AlphaVantage
 import CONFIG
 from DataStore import Indices as indi
 import os
-from multiprocessing import Process
+import time
 
 
 def init():
@@ -47,9 +47,6 @@ def saveDailyAdjusted(index=None, ticker=None):
 
 if __name__ == "__main__":
     init()
-    for category in indices["type"]:
-        # proc = Process(target=saveDailyAdjusted, args=[indices["type"][category]])
-        # proc.start()
-        # proc.join()
+    for i, category in enumerate(indices["type"]):
         print(category)
         saveDailyAdjusted(index=indices["type"][category])

@@ -1,0 +1,2 @@
+class BasicLSTM():
+    pass
