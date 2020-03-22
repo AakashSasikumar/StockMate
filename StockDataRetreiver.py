@@ -1,5 +1,6 @@
 from DataStore.APIInterface import AlphaVantage
 import CONFIG
+from tqdm import tqdm
 from DataStore import Indices as indi
 import os
 import time
@@ -15,23 +16,18 @@ def init():
 def saveDailyAdjusted(index=None, ticker=None):
     if ticker and not index:
         # only ticker
-        data = source.retreiveDailyAdjusted(ticker)
-        with open("DataStore/StockData/{}.csv".format(ticker), "a+") as f:
+        data = source.getDailyAdjusted(ticker)
+        with open("DataStore/StockData/{}.csv".format(ticker), "w+") as f:
             f.write(data)
     elif index and not ticker:
         # only index
-        if isinstance(index, list):
-            for item in index:
-                print(item)
-                indexName = list(item.keys())[0]
-                print(indexName)
-                for ticker in item[indexName]["constituents"]:
-                    print(ticker)
-                    if ticker + ".csv" in os.listdir("DataStore/StockData/"):
-                        continue
-                    data = source.retreiveDailyAdjusted(ticker)
-                    with open("DataStore/StockData/{}.csv".format(ticker), "a+") as f:
-                        f.write(data)
+        if isinstance(index, dict):
+            for ticker in tqdm(index['constituents']):
+                if ticker + ".csv" in os.listdir("DataStore/StockData/"):
+                    continue
+                data = source.getDailyAdjusted(ticker)
+                with open("DataStore/StockData/{}.csv".format(ticker), "w+") as f:
+                    f.write(data)
         elif isinstance(index, str):
             pass
         else:
@@ -47,6 +43,9 @@ def saveDailyAdjusted(index=None, ticker=None):
 
 if __name__ == "__main__":
     init()
-    for i, category in enumerate(indices["type"]):
-        print(category)
-        saveDailyAdjusted(index=indices["type"][category])
+    # saveDailyAdjusted(index=indices["type"]["Broad Market Indices :"]["NIFTY 50"])
+    saveDailyAdjusted(ticker="TCS")
+
+    # for i, category in enumerate(indices["type"]):
+    #     print(category)
+    #     saveDailyAdjusted(index=indices["type"][category])

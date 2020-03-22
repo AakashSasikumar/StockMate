@@ -9,3 +9,5 @@ phantomjs*
 Indices/
 DataStore/StockData*
 *TODO*
+Tests/
+ghostdriver.log
