@@ -12,4 +12,4 @@ DataStore/StockData*
 Tests/
 ghostdriver.log
 Observations.md
-FindBestForecast.py
+SavedModels/

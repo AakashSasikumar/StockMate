@@ -3,7 +3,6 @@ import CONFIG
 from tqdm import tqdm
 from DataStore import Indices
 import os
-import time
 
 
 def init():
@@ -14,19 +13,20 @@ def init():
 
 
 def saveDailyAdjusted(index=None, ticker=None, overwrite=False):
+    saveLoc = "DataStore/StockData/"
     if ticker and not index:
         # only ticker
         data = source.getDailyAdjusted(ticker)
-        with open("DataStore/StockData/{}.csv".format(ticker), "w+") as f:
+        with open("{}{}.csv".format(saveLoc, ticker), "w+") as f:
             f.write(data)
     elif index and not ticker:
         # only index
         if isinstance(index, dict):
             for ticker in tqdm(index['constituents']):
-                if ticker + ".csv" in os.listdir("DataStore/StockData/") and not overwrite:
+                if ticker + ".csv" in os.listdir(saveLoc) and not overwrite:
                     continue
                 data = source.getDailyAdjusted(ticker)
-                with open("DataStore/StockData/{}.csv".format(ticker), "w+") as f:
+                with open("{}{}.csv".format(saveLoc, ticker), "w+") as f:
                     f.write(data)
         elif isinstance(index, str):
             pass
@@ -43,7 +43,9 @@ def saveDailyAdjusted(index=None, ticker=None, overwrite=False):
 
 if __name__ == "__main__":
     init()
-    saveDailyAdjusted(index=indices["type"]["Broad Market Indices :"]["NIFTY 50"], overwrite=True)
+    category = "Broad Market Indices :"
+    index = "NIFTY 50"
+    saveDailyAdjusted(index=indices["type"][category][index], overwrite=True)
     # saveDailyAdjusted(ticker="MARUTI")
 
     # for i, category in enumerate(indices["type"]):

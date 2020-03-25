@@ -53,7 +53,8 @@ class RegressorBase():
             pickle.dump(self.history, f)
         self.model.save(savePath + "model", save_format="tf")
 
-    def loadModel(self, savePath="DataStore/SavedModels/Forecasters/", latest=True, file=None):
+    def loadModel(self, savePath="DataStore/SavedModels/Forecasters/",
+                  latest=True, file=None):
         # TODO: handle case where models are not there
         if latest:
             modelName = self.__class__.__name__
@@ -61,7 +62,7 @@ class RegressorBase():
             latestSave = sorted(os.listdir(savePath),
                                 key=lambda x: self.getDatetime(x))[-1]
             savePath = "{}/{}".format(savePath, latestSave)
-            self.model = keras.models.load(savePath)
+            self.model = keras.models.load_model(savePath+"/model")
         else:
             # TODO: Implement way to load specific date
             pass
@@ -70,16 +71,6 @@ class RegressorBase():
         dt = datetime.datetime.strptime(date, "%Y-%m-%d@%H:%M")
         return dt
 
-    def convertToWindows(self, data):
-        dataset = tf.data.Dataset.from_tensor_slices(data)
-        dataset = dataset.window(self.lookBack + self.forecast,
-                                 shift=self.forecast, drop_remainder=True)
-        dataset = dataset.flat_map(lambda w: w.batch(self.lookBack + self.forecast))
-        dataset = dataset.shuffle(len(data))
-        dataset = dataset.map(lambda w: (w[:-self.forecast], w[-self.forecast:]))
-        dataset = dataset.batch(self.batchSize).prefetch(1)
-        return dataset
-
     def train(self, trainDS, validDS, epochs=1000, earlyStopping=True,
               patience=15, callbacks=[]):
         keras.backend.clear_session()
@@ -87,6 +78,14 @@ class RegressorBase():
         if earlyStopping:
             callback = keras.callbacks.EarlyStopping(patience=patience)
             callbacks.append(callback)
-        history = self.model.fit(trainDS, epochs=epochs, validation_data=validDS,
+        history = self.model.fit(trainDS, epochs=epochs,
+                                 validation_data=validDS,
                                  callbacks=callbacks)
         self.history = history.history
+
+    def makePredictions(self, data, batchSize=32):
+        ds = tf.data.Dataset.from_tensor_slices(data)
+        ds = ds.window(self.lookBack, shift=self.forecast, drop_remainder=True)
+        ds = ds.flat_map(lambda w: w.batch(self.lookBack))
+        ds = ds.batch(batchSize).prefetch(1)
+        return self.model.predict(ds)
