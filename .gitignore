@@ -11,3 +11,5 @@ DataStore/StockData*
 *TODO*
 Tests/
 ghostdriver.log
+Observations.md
+FindBestForecast.py
