@@ -42,7 +42,7 @@ class DenseRegressor(RegressorBase):
         if loadLatest:
             self.loadModel()
 
-    def buildModel(self, learningRate=1e-3):
+    def buildModel(self, learningRate=None):
         model = keras.models.Sequential()
         model.add(keras.layers.Dense(self.lookBack,
                                      input_shape=[self.lookBack]))
@@ -53,7 +53,11 @@ class DenseRegressor(RegressorBase):
         model.add(keras.layers.Dense(self.forecast*2))
         model.add(keras.layers.Dense(self.forecast))
         # optimizer = keras.optimizers.RMSprop(lr=learningRate)
-        optimizer = keras.optimizers.Adam()
+        if learningRate:
+            optimizer = keras.optimizers.Adam(lr=learningRate)
+        else:
+            optimizer = keras.optimizers.Adam()
+
     #     model.compile(loss="mean_squared_error", optimizer=optimizer,
     #                   metrics=['mse'])
         model.compile(loss=keras.losses.Huber(), optimizer=optimizer,

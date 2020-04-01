@@ -182,7 +182,8 @@ class AlphaVantage():
                 The number of seconds till a new request can be sent
         """
         currentTime = time.time()
-        if ((currentTime - self.startTime) <= 60) and self.count == self.reqPerMin:
+        if ((currentTime - self.startTime) <= 60) and \
+           self.count == self.reqPerMin:
             limitReached = True
             timeTillNext = self.startTime + 60 - currentTime
         else:

@@ -25,6 +25,28 @@ class RegressorBase():
         return currentPath + "/"
 
     def saveModel(self, savePath="DataStore/SavedModels/Forecasters/"):
+        """Saves the model into the specified path.
+
+        This function writes the model and some additional details into
+        the specified location.
+
+        This method saves the following things:
+        1. modelSummary.txt
+            A text file containing information about the model such as
+            the layer wise parameters and total parameters that were trained
+        2. history.pickle
+            A pickle file containing the log of metrics while training the
+            model.
+        3. modelConfig.json
+            This file contains the model configuration. This can be used
+            later to replicate the model without the trained parameters
+
+        Parameters
+        ----------
+        savePath: str
+            The location which the model and additional info are to be saved
+
+        """
         # TODO:
         # Handle case where a model hasn't been trained yet
         projectRoot = self.getProjectRoot()
@@ -54,10 +76,19 @@ class RegressorBase():
         self.model.save(savePath + "model", save_format="tf")
 
     def loadModel(self, savePath="DataStore/SavedModels/Forecasters/",
-                  latest=True, file=None):
+                  date=False):
+        """Loads a saved model
+
+        Parameters
+        ----------
+        savePath: str, optional
+            The location from which the model is to loaded
+        date: str, optional
+            Used to specify a certain date. If none, loads the latest
+        """
         # TODO: handle case where models are not there
         savePath = self.getProjectRoot() + savePath
-        if latest:
+        if date:
             modelName = self.__class__.__name__
             savePath += modelName
             latestSave = sorted(os.listdir(savePath),
@@ -69,11 +100,42 @@ class RegressorBase():
             pass
 
     def getDatetime(self, date):
+        """Helper function used to convert the file naming convention
+        into a datetime.datetime object
+
+        Parameters
+        ----------
+        date: str
+            The string form of the directory
+
+        Returns
+        -------
+        dt: datetime.datetime
+            The corresponding datetime object
+        """
         dt = datetime.datetime.strptime(date, "%Y-%m-%d@%H:%M")
         return dt
 
     def train(self, trainDS, validDS, epochs=1000, earlyStopping=True,
               patience=15, callbacks=[]):
+        """The method to start training the model
+
+        Parameters:
+        ----------
+        trainDS: tf.Dataset
+            The object containing all the training data
+        validDS: tf.Dataset
+            The object containing all the validation data
+        epochs: int, optional
+            The number of epochs to train for
+        earlyStopping: boolean, optional
+            Specify whether early stopping based on validation
+            loss is required (recommended to keep it as True)
+        patience: int, optional
+            The number of epochs to wait for early stopping
+        callbacks: list
+            custom callbacks may be specified for training
+        """
         keras.backend.clear_session()
         if earlyStopping:
             callback = keras.callbacks.EarlyStopping(patience=patience)
@@ -84,8 +146,26 @@ class RegressorBase():
         self.history = history.history
 
     def makePredictions(self, data, batchSize=32):
+        """Formats the data and returns the model prediction
+
+        This method takes in the raw data, and converts it into the model's
+        input specification.
+
+        Parameters
+        ----------
+        data: numpy.ndarray
+            The input data for prediction
+        batchSize: int, optional
+            The batchSize of the data
+
+        Returns
+        -------
+        prediction: numpy.ndarray
+            The model's prediction
+        """
         ds = tf.data.Dataset.from_tensor_slices(data)
         ds = ds.window(self.lookBack, shift=self.forecast, drop_remainder=True)
         ds = ds.flat_map(lambda w: w.batch(self.lookBack))
         ds = ds.batch(batchSize).prefetch(1)
-        return self.model.predict(ds)
+        prediction = self.model.predict(ds)
+        return prediction
