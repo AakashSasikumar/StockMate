@@ -19,11 +19,12 @@ class AlphaVantage():
         The number of requests made within a 60 second bracket
 
     """
-    def __init__(self, apiKey, reqPerMin=5):
+    def __init__(self, apiKey, reqPerMin=5, proxy=None):
         self.apiKey = apiKey
         self.reqPerMin = reqPerMin
         self.startTime = None
         self.count = 0
+        self.proxy = proxy
 
     def buildQuery(self, function, ticker, interval=None, size="full",
                    exchange="NSE", datatype="csv"):
@@ -119,7 +120,7 @@ class AlphaVantage():
         -------
         response: str
             The intraday data
-            
+
         """
         function = "TIME_SERIES_DAILY_ADJUSTED"
 
@@ -152,7 +153,11 @@ class AlphaVantage():
             self.count = 0
 
         try:
-            response = requests.get(url)
+            if self.proxy:
+                proxy = {'http': self.proxy, 'https:': self.proxy}
+                response = requests.get(url, proxies=proxy)
+            else:
+                response = requests.get(url)
         except Exception as e:
             print(e.__traceback__)
 

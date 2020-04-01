@@ -56,6 +56,7 @@ class RegressorBase():
     def loadModel(self, savePath="DataStore/SavedModels/Forecasters/",
                   latest=True, file=None):
         # TODO: handle case where models are not there
+        savePath = self.getProjectRoot() + savePath
         if latest:
             modelName = self.__class__.__name__
             savePath += modelName
@@ -74,7 +75,6 @@ class RegressorBase():
     def train(self, trainDS, validDS, epochs=1000, earlyStopping=True,
               patience=15, callbacks=[]):
         keras.backend.clear_session()
-        callbacks = []
         if earlyStopping:
             callback = keras.callbacks.EarlyStopping(patience=patience)
             callbacks.append(callback)

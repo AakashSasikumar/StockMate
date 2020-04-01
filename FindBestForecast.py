@@ -12,7 +12,7 @@ def loadData():
     tickers = ind.getIndices()['type'][category][index]['constituents']
     data = pd.DataFrame()
     for ticker in tickers:
-        temp = pd.read_csv("DataStore/StockData/{}.csv".format(ticker),
+        temp = pd.read_csv("../DataStore/StockData/{}.csv".format(ticker),
                            parse_dates=['timestamp'], index_col='timestamp')
         data[ticker] = temp['close']
     data = data.sort_index()
@@ -27,13 +27,19 @@ def trainModel():
     dr.saveModel()
 
 
-def plotPredictions(ticker, lastN=30):
+def plotPredictions(ticker, lastN=30, tickerData=None, model=None, show=True):
     global data
-    dr = ann.DenseRegressor(loadLatest=True)
+    if isinstance(tickerData, pd.DataFrame):
+        data = tickerData
+
+    if model:
+        dr = model
+    else:
+        dr = ann.DenseRegressor(loadLatest=True)
 
     dataPoints = data[ticker].values[-lastN:]
     forecasts = dr.makePredictions(dataPoints)
-
+    print(forecasts)
     plt.plot(data.index[-lastN:].date, dataPoints,
              linewidth=1, label="Actual")
     plt.plot(data.index[-lastN+dr.lookBack-1::dr.forecast].date,
@@ -45,10 +51,15 @@ def plotPredictions(ticker, lastN=30):
     plt.show()
 
 
-def getNextDayTopPerformers(top=10):
+def getNextDayTopPerformers(top=10, model=None, tickerData=None):
     global data
     topPotentials = []
-    dr = ann.DenseRegressor(loadLatest=True)
+    if not model:
+        dr = ann.DenseRegressor(loadLatest=True)
+    else:
+        dr = model
+    if isinstance(tickerData, pd.DataFrame):
+        data = tickerData
     for ticker in list(data.columns):
         lastVal = data[ticker].values[-1]
 
@@ -64,6 +75,7 @@ def getNextDayTopPerformers(top=10):
 
 
 if __name__ == "__main__":
+    global data
     loadData()
     # trainModel()
     # plotPredictions("IOC")

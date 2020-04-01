@@ -52,12 +52,12 @@ class DenseRegressor(RegressorBase):
         model.add(keras.layers.Dense(self.forecast*3))
         model.add(keras.layers.Dense(self.forecast*2))
         model.add(keras.layers.Dense(self.forecast))
-        optimizer = keras.optimizers.RMSprop(lr=learningRate)
-    #     optimizer = keras.optimizers.Adam(lr=learningRate)
+        # optimizer = keras.optimizers.RMSprop(lr=learningRate)
+        optimizer = keras.optimizers.Adam()
     #     model.compile(loss="mean_squared_error", optimizer=optimizer,
     #                   metrics=['mse'])
         model.compile(loss=keras.losses.Huber(), optimizer=optimizer,
-                      metrics=['mse'])
+                      metrics=['mae'])
 
         self.model = model
 
