@@ -3,9 +3,19 @@ from tensorflow import keras
 import os
 import datetime
 import pickle
+import json
 
 
 class RegressorBase():
+    """A wrapper for all keras based regression networks
+
+    Attributes
+    ----------
+    model: keras.model
+        The keras model
+    history: keras.callbacks.callbacks.History
+        The train history of the model
+    """
     def getProjectRoot(self):
         """Returns the root directory of the folder
 
@@ -28,7 +38,10 @@ class RegressorBase():
         """Saves the model into the specified path.
 
         This function writes the model and some additional details into
-        the specified location.
+        the specified location. The directory naming convention is as
+        follows,
+
+        directoryName = yyyy-mm-dd@HH:MM
 
         This method saves the following things:
         1. modelSummary.txt
@@ -77,27 +90,56 @@ class RegressorBase():
 
     def loadModel(self, savePath="DataStore/SavedModels/Forecasters/",
                   date=False):
-        """Loads a saved model
+        """Loads the specified model.
+
+        This method is just for preparing the input and exception
+        handling.
 
         Parameters
         ----------
         savePath: str, optional
             The location from which the model is to loaded
         date: str, optional
-            Used to specify a certain date. If none, loads the latest
+            Used to specify a certain date. If none, loads the latest. This has
+            to be the folder name of the saved model.
         """
         # TODO: handle case where models are not there
         savePath = self.getProjectRoot() + savePath
-        if date:
-            modelName = self.__class__.__name__
-            savePath += modelName
+        modelName = self.__class__.__name__
+        savePath += modelName
+        if not date:
             latestSave = sorted(os.listdir(savePath),
                                 key=lambda x: self.getDatetime(x))[-1]
             savePath = "{}/{}".format(savePath, latestSave)
-            self.model = keras.models.load_model(savePath+"/model")
-        else:
-            # TODO: Implement way to load specific date
-            pass
+            self.loadAll(savePath)
+        elif isinstance(date, str):
+            allSaves = os.listdir(savePath)
+            if date not in allSaves:
+                # Raising exception as directory not present in savePath
+                message = "{} not in specified location {}".format(date,
+                                                                   savePath)
+                raise Exception(message)
+            else:
+                self.loadAll("{}/{}".format(savePath, date))
+
+    def loadAll(self, path):
+        """Loads the specified model
+
+        This method loads the model and other attributes when the
+        correct path is passed.
+
+        Parameters
+        ----------
+        path: str
+            The path of the model
+        """
+        self.model = keras.models.load_model(path+"/model")
+        with open(path + "/modelConfig.json") as f:
+            config = json.load(f)
+        firstLayerConfig = config['config']['layers'][0]['config']
+        lastLayerConfig = config['config']['layers'][-1]['config']
+        self.lookBack = firstLayerConfig['batch_input_shape'][-1]
+        self.forecast = lastLayerConfig['units']
 
     def getDatetime(self, date):
         """Helper function used to convert the file naming convention
