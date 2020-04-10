@@ -1,7 +1,7 @@
 from Models.KerasBase import RegressorBase
 import tensorflow as tf
 from tensorflow import keras
-from keras.layers import Dense, LSTM, Dropout
+from tensorflow.keras.layers import Dense, LSTM, Dropout
 import math
 
 
@@ -50,7 +50,7 @@ class BasicLSTM(RegressorBase):
         model.add(Dropout(0.3))
         model.add(LSTM(units=50))
         model.add(Dropout(0.3))
-        model.add(Dense(self.forecast * 3))
+        model.add(Dense(self.forecast*3))
         model.add(Dense(self.forecast*2))
         model.add(Dense(self.forecast))
 
@@ -62,7 +62,7 @@ class BasicLSTM(RegressorBase):
         model.compile(optimizer=optimizer, loss=keras.losses.Huber(),
                       metrics=['mse'])
 
-        return model
+        self.model = model
 
     def convertToWindows(self, data, yInd):
         """Method to convert the given ticker data into windows.
@@ -85,7 +85,7 @@ class BasicLSTM(RegressorBase):
         ds = ds.map(lambda w: (w[:-self.forecast], w[-self.forecast:, yInd]))
         return ds
 
-    def convertToWindowedDS(self, data, yInd, splitRatio=0.7, batchSize=32):
+    def convertToWindowedDS(self, data, yInd, splitRatio=0.7, batchSize=32, shuffle=False):
         """Method to convert the given dataset into windowed form for training.
 
         Parameters
@@ -99,6 +99,8 @@ class BasicLSTM(RegressorBase):
             The train, validation split ratio for the input data
         batchSize: int, optional
             The batchsize for the resultant windowed dataset
+        shuffle: bool, optional
+            If true, the windowed data will be shuffled
 
         Returns
         -------
@@ -125,8 +127,9 @@ class BasicLSTM(RegressorBase):
                 tmpValid = self.convertToWindows(valid, yInd)
                 trainDS.concatenate(tmpTrain)
                 validDS.concatenate(tmpValid)
-        trainDS = trainDS.shuffle(lenTrain)
-        validDS = validDS.shuffle(lenValid)
+        if shuffle:
+            trainDS = trainDS.shuffle(lenTrain)
+            validDS = validDS.shuffle(lenValid)
         trainDS = trainDS.batch(batchSize).prefetch(1)
         validDS = validDS.batch(batchSize).prefetch(1)
 

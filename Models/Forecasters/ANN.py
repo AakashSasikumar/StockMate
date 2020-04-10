@@ -132,7 +132,7 @@ class DenseRegressor(RegressorBase):
     #     model.compile(loss="mean_squared_error", optimizer=optimizer,
     #                   metrics=['mse'])
         model.compile(loss=keras.losses.Huber(), optimizer=optimizer,
-                      metrics=['mae'])
+                      metrics=['mse'])
 
         self.model = model
 

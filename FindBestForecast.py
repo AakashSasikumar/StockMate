@@ -39,7 +39,7 @@ def plotPredictions(ticker, lastN=30, tickerData=None, model=None, show=True):
 
     dataPoints = data[ticker].values[-lastN:]
     forecasts = dr.makePredictions(dataPoints)
-    print(forecasts)
+    # print(forecasts)
     plt.plot(data.index[-lastN:].date, dataPoints,
              linewidth=1, label="Actual")
     plt.plot(data.index[-lastN+dr.lookBack-1::dr.forecast].date,
