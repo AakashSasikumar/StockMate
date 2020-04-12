@@ -187,7 +187,7 @@ class RegressorBase():
                                  callbacks=callbacks)
         self.history = history.history
 
-    def makePredictions(self, data, batchSize=32):
+    def makePredictions(self, data, batchSize=1):
         """Formats the data and returns the model prediction
 
         This method takes in the raw data, and converts it into the model's

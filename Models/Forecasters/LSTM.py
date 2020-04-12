@@ -11,8 +11,10 @@ class BasicLSTM(RegressorBase):
     Since this is an LSTM based regressor, the dimensionality of the data can
     be greater than or equal to 1.
 
-    This model contains 3 LSTM layers with size 50 along with dropouts, and
-    three Dense layers with varying size as per forecast size.
+    This model can be used to train on an entire index.
+
+    This model contains 2 LSTM layers with size 200 and 150, along with
+    dropouts, and a Dense layer for the return sequence.
 
     Attributes
     ----------
@@ -25,6 +27,8 @@ class BasicLSTM(RegressorBase):
         Variable to specify how many days ahead to make predictions for.
     model: keras.models
         The keras model of the ANN
+    yInd: int
+        The position of the target variable
     """
     def __init__(self, numDims, lookBack=4, forecast=1, loadLatest=False):
         self.numDims = numDims
@@ -42,17 +46,14 @@ class BasicLSTM(RegressorBase):
             Optional learning to specify for the AdamOptimizer
 
         """
+
         model = keras.models.Sequential()
-        model.add(LSTM(units=50, return_sequences=True,
-                       input_shape=(self.lookBack, 1)))
-        model.add(Dropout(0.3))
-        model.add(LSTM(units=50, return_sequences=True))
-        model.add(Dropout(0.3))
-        model.add(LSTM(units=50))
-        model.add(Dropout(0.3))
-        model.add(Dense(self.forecast*3))
-        model.add(Dense(self.forecast*2))
-        model.add(Dense(self.forecast))
+        model.add(LSTM(200, input_shape=(self.lookBack, self.numDims),
+                       stateful=False, return_sequences=True))
+        model.add(Dropout(0.5))
+        model.add(LSTM(150, return_sequences=True))
+        model.add(Dropout(0.2))
+        model.add(Dense(1, activation='relu'))
 
         if learningRate:
             optimizer = keras.optimizers.Adam(lr=learningRate)
@@ -68,7 +69,8 @@ class BasicLSTM(RegressorBase):
         """Method to convert the given ticker data into windows.
 
         This method deals with individual ticker data and converts them to
-        windows that can be later concatenated with other ticker data.
+        windows that can be later concatenated with other ticker data. This is
+        modified to return a sequence that is moved forward by forecast.
 
         Parameters
         ----------
@@ -77,15 +79,17 @@ class BasicLSTM(RegressorBase):
         yInd:
             The index of the variable that is to be predicted
         """
+        self.yInd = yInd
         ds = tf.data.Dataset.from_tensor_slices(data)
         ds = ds.window(self.lookBack + self.forecast,
-                       shift=self.forecast + self.lookBack,
+                       shift=self.forecast,
                        drop_remainder=True)
         ds = ds.flat_map(lambda w: w.batch(self.lookBack + self.forecast))
-        ds = ds.map(lambda w: (w[:-self.forecast], w[-self.forecast:, yInd]))
+        ds = ds.map(lambda w: (w[:-self.forecast], w[self.forecast:, yInd]))
         return ds
 
-    def convertToWindowedDS(self, data, yInd, splitRatio=0.7, batchSize=32, shuffle=False):
+    def convertToWindowedDS(self, data, yInd=0, splitRatio=0.7, batchSize=32,
+                            shuffle=True, columns=None):
         """Method to convert the given dataset into windowed form for training.
 
         Parameters
@@ -93,7 +97,7 @@ class BasicLSTM(RegressorBase):
         data: pd.DataFrame()
             The input data. This can have multiple columns for multiple
             tickers.
-        yInd: int
+        yInd: int, optional
             The position of the variable to be predicted
         splitRatio: float, optional
             The train, validation split ratio for the input data
@@ -101,6 +105,9 @@ class BasicLSTM(RegressorBase):
             The batchsize for the resultant windowed dataset
         shuffle: bool, optional
             If true, the windowed data will be shuffled
+        columns: list, optional
+            If columns are specified, the windowed dataset is
+            made from the data from these columns
 
         Returns
         -------
@@ -111,8 +118,15 @@ class BasicLSTM(RegressorBase):
         """
         lenTrain = 0
         lenValid = 0
-        for i, ticker in enumerate(list(data.columns)):
-            values = data[ticker].values
+        if isinstance(columns, list):
+            cols = columns
+        else:
+            cols = list(columns)
+        for i, ticker in enumerate(cols):
+            if self.numDims == 1:
+                values = data[ticker].values.reshape(-1, 1)
+            else:
+                values = data[ticker].values
             splitInd = math.floor(splitRatio * len(values))
             train = values[:splitInd]
             valid = values[splitInd:]

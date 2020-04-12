@@ -12,8 +12,8 @@ class BasicRegressor(RegressorBase):
     univariate.
 
     The model consists of one fully connected layer with output size
-     equal to forecast. This model is usually used to train one single ticker,
-     and is not recommended for learning multiple stock data.
+    equal to forecast. This model is usually used to train one single ticker,
+    and is not recommended for learning multiple stock data.
 
     Attributes
     ----------
@@ -154,7 +154,8 @@ class DenseRegressor(RegressorBase):
         ds = ds.map(lambda w: (w[:-self.forecast], w[-self.forecast:]))
         return ds
 
-    def convertToWindowedDS(self, data, splitRatio=0.7, batchSize=32):
+    def convertToWindowedDS(self, data, splitRatio=0.7, batchSize=32,
+                            columns=None):
         """Method to convert the given dataset into windowed form for training.
 
         Parameters
@@ -176,7 +177,11 @@ class DenseRegressor(RegressorBase):
         """
         lenTrain = 0
         lenValid = 0
-        for i, ticker in enumerate(list(data.columns)):
+        if isinstance(columns, list):
+            cols = columns
+        else:
+            cols = list(data.columns)
+        for i, ticker in enumerate(cols):
             values = data[ticker].values
             splitInd = math.floor(splitRatio * len(values))
             train = values[:splitInd]
