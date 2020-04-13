@@ -60,8 +60,6 @@ class RegressorBase():
             The location which the model and additional info are to be saved
 
         """
-        # TODO:
-        # Handle case where a model hasn't been trained yet
         projectRoot = self.getProjectRoot()
         ds = projectRoot + "DataStore/"
         savePath = projectRoot + savePath
@@ -74,10 +72,10 @@ class RegressorBase():
             os.mkdir(savePath + modelName)
         savePath = savePath + modelName
 
-        # TODO:
-        # Handle the case where a model already exists for the same date
         saveDateTime = str(datetime.datetime.now())[:-10].replace(" ", "@")
-
+        if saveDateTime in os.listdir(savePath):
+            message = "model already exists for this datetime"
+            raise Exception(message)
         savePath = "{}/{}/".format(savePath, saveDateTime)
         os.mkdir(savePath)
         with open(savePath + "modelSummary.txt", "w+") as f:
@@ -103,11 +101,13 @@ class RegressorBase():
             Used to specify a certain date. If none, loads the latest. This has
             to be the folder name of the saved model.
         """
-        # TODO: handle case where models are not there
         savePath = self.getProjectRoot() + savePath
         modelName = self.__class__.__name__
         savePath += modelName
         if not date:
+            if len(os.listdir(savePath)) == 0:
+                message = "no saved models present"
+                raise Exception(message)
             latestSave = sorted(os.listdir(savePath),
                                 key=lambda x: self.getDatetime(x))[-1]
             savePath = "{}/{}".format(savePath, latestSave)
