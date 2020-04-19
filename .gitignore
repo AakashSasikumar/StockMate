@@ -7,4 +7,9 @@ app.py
 geckodriver*
 phantomjs*
 Indices/
-DataStore/StockData
+DataStore/StockData*
+*TODO*
+Tests/
+ghostdriver.log
+Observations.md
+SavedModels/

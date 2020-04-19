@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
+import tqdm
 
 
 def sharpeRatio(returns):
@@ -52,7 +53,7 @@ def gradient(x, theta, delta):
 def train(x, epochs=500, M=5, commission=0.0025, learningRate=0.1):
     theta = np.ones(M + 2)
     sharpes = np.zeros(epochs)  # store sharpes over time
-    for i in range(epochs):
+    for i in tqdm.tqdm(range(epochs)):
         grad, sharpe = gradient(x, theta, commission)
         theta = theta + grad * learningRate
 
@@ -63,4 +64,18 @@ def train(x, epochs=500, M=5, commission=0.0025, learningRate=0.1):
 
 
 df = pd.read_csv("DataStore/StockData/TECHM.csv")
-print(df)
+diff = df['adjusted_close'].diff()[1:]
+
+N = 3000
+P = 334
+x = np.array(diff)
+x = (x - np.mean(x)) / np.std(x)
+
+xTrain = x[-(N+P):-P]
+xTest = x[-P:]
+
+theta, sharpes = train(xTrain, epochs=3000, M=5, commission=0.002, learningRate=0.001)
+plt.plot(sharpes)
+plt.xlabel("Epoch")
+plt.ylabel("Sharpe Ratio")
+plt.show()

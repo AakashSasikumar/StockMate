@@ -1,37 +1,33 @@
 from DataStore.APIInterface import AlphaVantage
 import CONFIG
-from DataStore import Indices as indi
+from tqdm import tqdm
+from DataStore import Indices
 import os
-from multiprocessing import Process
 
 
 def init():
     global source, indices
     source = AlphaVantage(CONFIG.ALPHA_VANTAGE_API)
-    indi.init()
+    indi = Indices.NSEIndices()
     indices = indi.getIndices()
 
 
-def saveDailyAdjusted(index=None, ticker=None):
+def saveDailyAdjusted(index=None, ticker=None, overwrite=False):
+    saveLoc = "DataStore/StockData/"
     if ticker and not index:
         # only ticker
-        data = source.retreiveDailyAdjusted(ticker)
-        with open("DataStore/StockData/{}.csv".format(ticker), "a+") as f:
+        data = source.getDailyAdjusted(ticker)
+        with open("{}{}.csv".format(saveLoc, ticker), "w+") as f:
             f.write(data)
     elif index and not ticker:
         # only index
-        if isinstance(index, list):
-            for item in index:
-                print(item)
-                indexName = list(item.keys())[0]
-                print(indexName)
-                for ticker in item[indexName]["constituents"]:
-                    print(ticker)
-                    if ticker + ".csv" in os.listdir("DataStore/StockData/"):
-                        continue
-                    data = source.retreiveDailyAdjusted(ticker)
-                    with open("DataStore/StockData/{}.csv".format(ticker), "a+") as f:
-                        f.write(data)
+        if isinstance(index, dict):
+            for ticker in tqdm(index['constituents']):
+                if ticker + ".csv" in os.listdir(saveLoc) and not overwrite:
+                    continue
+                data = source.getDailyAdjusted(ticker)
+                with open("{}{}.csv".format(saveLoc, ticker), "w+") as f:
+                    f.write(data)
         elif isinstance(index, str):
             pass
         else:
@@ -47,9 +43,11 @@ def saveDailyAdjusted(index=None, ticker=None):
 
 if __name__ == "__main__":
     init()
-    for category in indices["type"]:
-        # proc = Process(target=saveDailyAdjusted, args=[indices["type"][category]])
-        # proc.start()
-        # proc.join()
-        print(category)
-        saveDailyAdjusted(index=indices["type"][category])
+    category = "Broad Market Indices :"
+    index = "NIFTY 50"
+    saveDailyAdjusted(index=indices["type"][category][index], overwrite=True)
+    # saveDailyAdjusted(ticker="MARUTI")
+
+    # for i, category in enumerate(indices["type"]):
+    #     print(category)
+    #     saveDailyAdjusted(index=indices["type"][category])

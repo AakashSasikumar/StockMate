@@ -11,9 +11,9 @@ This is a python based tool for training and viewing performance of different mo
     - Either by scraping Zerodha Kite or
     - By sending you notifications on when to buy/sell
 
-
 ## Requirements
 
 1. plotly dash
 2. selenium
 3. phantomjs driver
+4. keras
