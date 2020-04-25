@@ -17,3 +17,4 @@ This is a python based tool for training and viewing performance of different mo
 2. selenium
 3. phantomjs driver
 4. keras
+5. lxml

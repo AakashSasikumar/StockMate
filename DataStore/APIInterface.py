@@ -1,6 +1,7 @@
 import requests
 import time
 import urllib
+from Utils import AutoRotate as ar
 
 
 class AlphaVantage():
@@ -8,23 +9,48 @@ class AlphaVantage():
 
     Attributes
     ----------
-    apiKey: str
-        The API key for the AlphaVantage API
+    apiKey: str or list
+        The API key for the AlphaVantage API, a list of api keys have to
+        be given when using autototate
     reqPerMin: int
         The limit of number of requests per minute set by AlphaVantage
+    reqPerDay: int
+        The day limit of number of requesters set by AlphaVantage
     startTime: time.time()
         The time at which the first request had been sent in a
         60 second bracket
     count: int
         The number of requests made within a 60 second bracket
+    autoRotate: bool
+        A feature that allows you to break the barrier of api limits.
+        When provided a list of apiKeys, it will automatically rotate
+        them along with different proxies to get data.
+
+    Note: The autorotate feature is limited to len(apiKeys) * reqPerDay
 
     """
-    def __init__(self, apiKey, reqPerMin=5, proxy=None):
+    def __init__(self, apiKey, reqPerMin=5, reqPerDay=500,
+                 autoRotate=False, apiUsageDataLoc="APIKeyUsageData.json"):
         self.apiKey = apiKey
         self.reqPerMin = reqPerMin
+        self.reqPerDay = reqPerDay
         self.startTime = None
         self.count = 0
-        self.proxy = proxy
+        self.autoRotate = autoRotate
+
+        if autoRotate:
+            # Using autorotate but apiKey isn't a list
+            if not isinstance(apiKey, list):
+                message = "apiKey must be a list when using autoRotate"
+                raise Exception(message)
+            self.apiKeys = apiKey
+            self.apiKey = apiKey[0]
+            ar.init(self.apiKeys, apiUsageDataLoc, self.reqPerDay)
+        if not autoRotate:
+            # Not using autorotate but apiKey isn't a list
+            if not isinstance(apiKey, str):
+                message = "apiKey must be str when using autoRotate"
+                raise Exception(message)
 
     def buildQuery(self, function, ticker, interval=None, size="full",
                    exchange="NSE", datatype="csv"):
@@ -98,10 +124,13 @@ class AlphaVantage():
         """
         function = "TIME_SERIES_INTRADAY"
 
+        proxy = None
+        if self.autoRotate:
+            self.apiKey, proxy = ar.getKeyAndProxy()
         alphaVantageURL = self.buildQuery(function, ticker,
                                           interval, datatype=datatype)
 
-        return self.getResponse(alphaVantageURL)
+        return self.getResponse(alphaVantageURL, proxy)
 
     def getDailyAdjusted(self, ticker, datatype="csv"):
         """Returns daily adjusted data
@@ -124,12 +153,15 @@ class AlphaVantage():
         """
         function = "TIME_SERIES_DAILY_ADJUSTED"
 
+        proxy = None
+        if self.autoRotate:
+            self.apiKey, proxy = ar.getKeyAndProxy()
         alphaVantageURL = self.buildQuery(function, ticker,
                                           datatype=datatype)
-        response = self.getResponse(alphaVantageURL)
+        response = self.getResponse(alphaVantageURL, proxy)
         return response
 
-    def getResponse(self, url):
+    def getResponse(self, url, proxy=None):
         """Returns the response after querying
 
         Parameters
@@ -153,13 +185,13 @@ class AlphaVantage():
             self.count = 0
 
         try:
-            if self.proxy:
-                proxy = {'http': self.proxy, 'https:': self.proxy}
+            if proxy:
+                proxy = {'http': proxy, 'https:': proxy}
                 response = requests.get(url, proxies=proxy)
             else:
                 response = requests.get(url)
         except Exception as e:
-            print(e.__traceback__)
+            print(e)
 
         self.count += 1
 

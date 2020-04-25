@@ -7,7 +7,7 @@ import os
 
 def init():
     global source, indices
-    source = AlphaVantage(CONFIG.ALPHA_VANTAGE_API)
+    source = AlphaVantage(CONFIG.ALL_API_KEYS, autoRotate=True)
     indi = Indices.NSEIndices()
     indices = indi.getIndices()
 
@@ -44,7 +44,7 @@ def saveDailyAdjusted(index=None, ticker=None, overwrite=False):
 if __name__ == "__main__":
     init()
     category = "Broad Market Indices :"
-    index = "NIFTY 50"
+    index = "NIFTY NEXT 50"
     saveDailyAdjusted(index=indices["type"][category][index], overwrite=True)
     # saveDailyAdjusted(ticker="MARUTI")
 
