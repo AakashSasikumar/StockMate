@@ -7,6 +7,10 @@ import random
 
 
 def init(apiKey, apiUsageData="APIKeyUsageData.json", dailyLimit=500):
+    """Initializes the AutoRotate module
+
+    Loads the apiUsage data and scrapes a list of proxies
+    """
     global proxies, apiDataDict, apiKeys, dayLimit, apiDataDictLoc
 
     apiDataDictLoc = apiUsageData
@@ -27,6 +31,13 @@ def init(apiKey, apiUsageData="APIKeyUsageData.json", dailyLimit=500):
 
 
 def initApiDataDict():
+    """Method called when saving api usage data for the first time
+
+    This method creates the dictionary structure used to save the api usage
+    data. When the dictionary is created, it is assumed that the api has
+    already been used 10 times. If this value needs to be changed, it
+    can be edited in the saved file.
+    """
     global apiDataDict
     for apiKey in apiKeys:
         apiDataDict[apiKey] = {}
@@ -35,6 +46,17 @@ def initApiDataDict():
 
 
 def loadAPIDict(apiUsageData):
+    """Method to load the api usage data
+
+    This method is called when the path of the api usage data is valid.
+    If apiKeys have not been used for more than 24 hours, their timesUsed
+    attribute is reset to 0.
+
+    Parameters
+    ----------
+    apiUsageData: str
+        The location of the api usage data
+    """
     global apiDataDict
     with open(apiUsageData) as f:
         apiDataDict = json.load(f)
@@ -48,6 +70,18 @@ def loadAPIDict(apiUsageData):
 
 
 def getKeyAndProxy():
+    """Method to return a valid apiKey and proxy address
+
+    This method iterates through all the apiKeys and proxies and
+    returns pair that has not breached the daily limit quota.
+
+    Returns
+    -------
+    apiKey: str
+        The api key
+    proxy: str
+        The proxy to be used when fetching data
+    """
     global apiDataDict, proxies
     for i, apiKey in enumerate(apiKeys):
         apiData = apiDataDict[apiKey]
@@ -69,6 +103,11 @@ def getKeyAndProxy():
 
 
 def saveApiDataDict():
+    """Method to save the api usage data into a file
+
+    This method modifies the last used attribute for each apiKey
+    and saves the data as a json file.
+    """
     toSaveData = apiDataDict.copy()
     for key in toSaveData:
         data = toSaveData[key]
@@ -78,6 +117,8 @@ def saveApiDataDict():
 
 
 def getProxies(num=-1):
+    """Method to scrape the list of valid proxies
+    """
     # TODO:
     # Add support for num > 20
     proxyDict = {}
