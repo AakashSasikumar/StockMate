@@ -1,5 +1,4 @@
 # from DataStore.Indices import Indices
-import json
 import os
 import importlib
 import sys
@@ -21,7 +20,8 @@ def getKerasLayers():
 
 
 def initForecasterDetails(kerasLayers, location="Models/Forecasters",
-                          skipList=["NaiveModel", "KerasBase", "RegressorBase"]):
+                          skipList=["NaiveModel", "KerasBase",
+                                    "RegressorBase"]):
     global allForecasters
 
     allForecasters = {}
