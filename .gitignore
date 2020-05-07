@@ -13,3 +13,7 @@ Tests/
 ghostdriver.log
 Observations.md
 SavedModels/
+UI/*
+APIKeyUsageData.json
+Models/ModelInfo.json
+setup.py
