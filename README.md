@@ -2,6 +2,8 @@
 
 A python based tool to build agents and models for stock price prediction and trade automation.
 
+`StockMate` is a working title. I haven't come up with a good name for it yet...
+
 ## Requirements
 
 1. plotly dash
@@ -23,6 +25,11 @@ A python based tool to build agents and models for stock price prediction and tr
 2. Fully fledged website to view and modify forecasters and agents
 3. More customization for forecasters
 4. Semi-trade-automation by means of a telegram chatbot
+
+## Work In Progress
+
+1. Building a website/webUI and connecting with the python backend
+    - I have no skills in making good UIs or websites; I shamelessly copied [an open source dashboard](https://github.com/BlackrockDigital/startbootstrap-sb-admin-2).
 
 ## Methods of Stock Price Predictions
 

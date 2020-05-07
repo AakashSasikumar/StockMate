@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+
+{%include 'head.html'%}
+
+<body id="page-top">
+
+  <!-- Page Wrapper -->
+  <div id="wrapper">
+
+    <!-- Sidebar -->
+    {% include 'sidebar.html' %}
+    <!-- End of Sidebar -->
+
+    <!-- Content Wrapper -->
+    <div id="content-wrapper" class="d-flex flex-column">
+
+      <!-- Main Content -->
+      <div id="content">
+
+        <!-- Topbar -->
+        <nav class="navbar navbar-expand navbar-light bg-white topbar mb-4 static-top shadow">
+
+          <!-- Sidebar Toggle (Topbar) -->
+          <button id="sidebarToggleTop" class="btn btn-link d-md-none rounded-circle mr-3">
+            <i class="fa fa-bars"></i>
+          </button>
+        </nav>
+        <!-- End of Topbar -->
+
+        <!-- Begin Page Content -->
+        <div class="container-fluid">
+
+          <!-- Page Heading -->
+          <div class="d-sm-flex align-items-center justify-content-between mb-4">
+            <h1 class="h3 mb-0 text-gray-800">{{pageName}}</h1>
+          </div>
+          <div class="row">
+
+            <div class="col">
+
+              <!-- Default Card Example -->
+              <div class="card mb-4">
+                <div class="card-header">
+                  Forecasters
+                </div>
+                <div class="card-body">
+                  Forecasters can predict future stock prices. The options below should help you build a custom forecaster. Keep in mind that none of these model
+                  predictions are 100% accurate, so use at your own risk.
+                </div>
+              </div>
+
+              <!-- Basic Card Example -->
+              <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                  <h6 class="m-0 font-weight-bold text-primary">Forecaster Creation</h6>
+                </div>
+                <div class="card-body">
+                  <label for="forecasterSelection" style="display: inline-block;width: 120px;">Choose a model</label>
+                  <select id="forecasterSelection" class="form-control2 bg-light border-0 small" onchange="forecasterSelected()">
+                    {% for model in allModels: %}
+                    <option value="{{model}}">{{model}}</option>
+                    {% endfor %}
+                  </select>
+                  {% for model in allModels: %}
+                  <blockquote>
+                    <p id="{{'{}ForecasterDescription'.format(model)}}" style="display: none;">{{allModels[model]["description"]}}</p>
+                  </blockquote>
+                  {% endfor %}
+                  <script>
+                    var allForecasters = {{allModels|tojson}};
+                    var allForecasterParams = {{allParams|tojson}}
+                  </script>
+                  {% for param in allParams:  %}
+                    <div class="block" id="{{'{}ForecasterParamDiv'.format(param)}}" style="display: none;">
+                      <label for="{{'{}ForecasterParam'.format(param)}}" style="display: inline-block;width: 120px;">{{param.capitalize()}}</label>
+                      <input id="{{'{}ForecasterParam'.format(param)}}" type="number" class="form-control2 bg-light border-0 small" aria-describedby="basic-addon2">
+                    </div>
+                  {%  endfor %}
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+        </div>
+        <!-- /.container-fluid -->
+
+      </div>
+      <!-- End of Main Content -->
+
+      <!-- Footer -->
+      <footer class="sticky-footer bg-white">
+        <div class="container my-auto">
+          <div class="copyright text-center my-auto">
+            <span>StockMate :)</span>
+          </div>
+        </div>
+      </footer>
+      <!-- End of Footer -->
+
+    </div>
+    <!-- End of Content Wrapper -->
+
+  </div>
+  <!-- End of Page Wrapper -->
+  {% include 'footerImports.html' %}
+</body>
+
+</html>

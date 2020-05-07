@@ -2,7 +2,6 @@
 .vscode
 __pycache__
 CONFIG.py
-app.py
 *[tT]est*
 geckodriver*
 phantomjs*
@@ -14,6 +13,5 @@ ghostdriver.log
 Observations.md
 SavedModels/
 APIKeyUsageData.json
-UI/*
 Models/ModelInfo.json
 setup.py
