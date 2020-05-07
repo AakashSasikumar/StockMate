@@ -8,14 +8,21 @@ import math
 class BasicCNN(RegressorBase):
     """A basic implementation of a CNN based regressor for stock price prediction.
 
-    Similar to the LSTM model, this model can have a dimensionality greater than 1.
+    Theoretically the CNN model can support multivariate data. However, that
+    support hasn't been built into this yet. The model structure has a
+    convolution layer, two LSTM layers with 32 units and a dense layer.
 
-    This model structure is as follows:
-        1. Convolution layer
-        2. LSTM layer with 32 units
-        3. LSTM layer with 32 units
-        4. Dense node for each of the 32 outputs
-
+    Attributes
+    ----------
+    numDims: int
+        The dimensionality of the data
+    lookBack: int, optional
+        Variable to specify how many days to consider when making
+        a prediction
+    forecast: int, optional
+        Variable to specify how many days ahead to make predictions for.
+    model: keras.models
+        The keras model
     """
     def __init__(self, numDims, lookBack=4, forecast=1, loadLatest=False):
         self.numDims = numDims

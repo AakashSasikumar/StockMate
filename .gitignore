@@ -15,3 +15,5 @@ Observations.md
 SavedModels/
 APIKeyUsageData.json
 UI/*
+Models/ModelInfo.json
+setup.py

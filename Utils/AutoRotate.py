@@ -66,7 +66,7 @@ def loadAPIDict(apiUsageData):
                                        "%Y-%m-%d %H:%M")
         if datetime.datetime.now() - apiDataDict[apiKey]["lastSaved"] \
            >= datetime.timedelta(hours=24):
-            apiDataDict["timesUsed"] = 0
+            apiDataDict[apiKey]["timesUsed"] = 0
 
 
 def getKeyAndProxy():

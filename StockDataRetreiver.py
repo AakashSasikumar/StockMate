@@ -44,7 +44,7 @@ def saveDailyAdjusted(index=None, ticker=None, overwrite=False):
 if __name__ == "__main__":
     init()
     category = "Broad Market Indices :"
-    index = "NIFTY NEXT 50"
+    index = "NIFTY 50"
     saveDailyAdjusted(index=indices["type"][category][index], overwrite=True)
     # saveDailyAdjusted(ticker="MARUTI")
 
