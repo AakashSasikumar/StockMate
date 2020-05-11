@@ -1,5 +1,6 @@
 from flask import Flask
 from flask import render_template
+
 from Utils import UIInitializer as uint
 
 
@@ -30,10 +31,13 @@ def myForecasters():
 def createForecasters():
     pageName = "Create Forecasters"
     title = "{}-{}".format(websiteName, pageName)
+    print()
     return render_template("createForecasters.html", title=title,
                            pageName=pageName,
                            allModels=uint.allForecasters,
-                           allParams=uint.getUniqueForecasterParams())
+                           allParams=uint.getUniqueForecasterParams(),
+                           indices=uint.getAllIndicesAndConstituents(),
+                           allFeatures=uint.getAllFeatures())
 
 
 @app.route("/myAgents")

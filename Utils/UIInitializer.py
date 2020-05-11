@@ -1,7 +1,7 @@
-# from DataStore.Indices import Indices
+from DataStore import Indices as Indices
 import os
-import importlib
 import sys
+import importlib
 import inspect
 from tensorflow import keras
 
@@ -71,6 +71,17 @@ def getUniqueForecasterParams():
         params = allForecasters[model]["params"]
         allParams.extend(params)
     return list(set(allParams))
+
+
+def getAllIndicesAndConstituents():
+    ind = Indices.NSEIndices()
+    return ind.getIndices()["type"]
+
+
+def getAllFeatures():
+    # currently only these are supported
+    features = ["Open", "High", "Low", "Close", "Volume"]
+    return features
 
 
 if __name__ == "__main__":

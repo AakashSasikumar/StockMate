@@ -70,6 +70,7 @@
                   <script>
                     var allForecasters = {{allModels|tojson}};
                     var allForecasterParams = {{allParams|tojson}}
+                    var indices = {{indices|tojson}}
                   </script>
                   {% for param in allParams:  %}
                     <div class="block" id="{{'{}ForecasterParamDiv'.format(param)}}" style="display: none;">
@@ -82,19 +83,75 @@
 
               <div class="card shadow mb-4">
                 <div class="card-header py-3">
-                  <h6 class="m-0 font-weight-bold text-primary">2. Define The Data</h6>
+                  <h6 class="m-0 font-weight-bold text-primary">2. Choose The Data</h6>
                 </div>
                 <div class="card-body">
-                  <p>Define the data, and it's features here</p>
+                  <label for="indexCategory" style="display: inline-block;width: 120px;">Index Category</label>
+                  <select id="indexCategory" class="form-control2 bg-light border-0 small" onchange="indexCategorySelected(this)">
+                    {% for cat in indices: %}
+                    <option value="{{cat}}">{{cat}}</option>
+                    {% endfor %}
+                  </select>
+                  <div id="indexSelection" style="display: none;">
+                    <label for="indexName" style="display: inline-block;width: 120px;">Index Name</label>
+                    <select id="indexName" class="form-control2 bg-light border-0 small" onchange="indexNameSelected(this)">
+                    </select>
+                  </div>
+                  
+                  <div id="stockTickerSelection" style="display: none;">
+                    <label for="stockTickers" style="display: inline-block;width: 120px;">Tickers</label>
+                    <select id="stockTickers" class="form-control2 bg-light border-0 small" onchange="stockNameSelected(this)">
+                    </select>
+                  </div>
+                  
+                  <div id="tickerSelector" style="display: none;">
+                    <input id="selectedTickers"></input>
+                  </div>
+                  <div id="tickerSelectorButtons" style="display: none;">
+                    <button id="tickerClear" class="btn btn-primary" type="button" onclick="clearSelectedTickers(this)">
+                      Clear All
+                    </button>
+                  </div>
+
+                </div>
+              </div>
+              
+              <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                  <h6 class="m-0 font-weight-bold text-primary">3. Choose The Features</h6>
+                </div>
+                <div class="card-body">
+                  <label for="featureSelection">Feature Selection</label>
+                  <select id="featureSelection" class="form-control2 bg-light border-0 small" onchange="featureSelected(this)">
+                    {% for featureName in allFeatures %}
+                    <option value="{{featureName}}">{{featureName}}</option>
+                    {% endfor %}
+                  </select>
+                  <div id="featureSelector">
+                    <input id="selectedFeatures"></input>
+                  </div>
+                  <div id="tickerSelectorButtons">
+                    <button id="featureClear" class="btn btn-primary" type="button" onclick="clearSelectedTickers(this)">
+                      Clear All
+                    </button>
+                  </div>
                 </div>
               </div>
 
               <div class="card shadow mb-4">
                 <div class="card-header py-3">
-                  <h6 class="m-0 font-weight-bold text-primary">3. Name Your Model and Create It</h6>
+                  <h6 class="m-0 font-weight-bold text-primary">4. Name Your Model and Create It</h6>
                 </div>
                 <div class="card-body">
-                  <p>Give a good name for your model and create it</p>
+                  <div class="input-group w-50" id="nameAndSubmit">
+                    <!-- <label for="forecasterName" style="display: inline-block;width: 120px;">Model Name</label> -->
+                    <input id="forecasterName" type="text" class="form-control bg-light border-0 small" placeholder="Enter Name here..." aria-describedby="basic-addon2">
+                    <div class="input-group-append">
+                      <button class="btn btn-primary" type="button" onclick="modelSubmit()">
+                        Create Model
+                      </button>
+                    </div>
+                  </div>
                 </div>
               </div>
 
