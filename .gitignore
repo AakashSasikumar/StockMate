@@ -2,15 +2,14 @@
 .vscode
 __pycache__
 CONFIG.py
-*[tT]est*
 geckodriver*
 phantomjs*
 Indices/
 DataStore/StockData*
 *TODO*
-Tests/
 ghostdriver.log
 Observations.md
 SavedModels/
 APIKeyUsageData.json
 Models/ModelInfo.json
+*[Tt]est*
