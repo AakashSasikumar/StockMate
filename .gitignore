@@ -4,7 +4,7 @@ __pycache__
 CONFIG.py
 geckodriver*
 phantomjs*
-Indices/
+DataStore/Indices/NSE-Indices-2020-02-29.json
 DataStore/StockData*
 *TODO*
 ghostdriver.log
