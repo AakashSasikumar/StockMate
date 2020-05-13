@@ -26,6 +26,10 @@ A python based tool to build agents and models for stock price prediction and tr
 3. More customization for forecasters
 4. Semi-trade-automation by means of a telegram chatbot
 
+
+1. Building a website/webUI and connecting with the python backend
+    - I have no skills in making good UIs or websites; I shamelessly copied [an open source dashboard](https://github.com/BlackrockDigital/startbootstrap-sb-admin-2).
+
 ## Methods of Stock Price Predictions
 
 ### 1. Forecasters

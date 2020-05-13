@@ -72,7 +72,7 @@ class NSEIndices():
     def updateIndices(self):
         """Scrapes all the NSE Indices and saves their data
         """
-        categorySkipList = ["Fixed Income Indices :"]
+        categorySkipList = ["Fixed Income Indices"]
         indexSkipList = ["NIFTY 100", "NIFTY 200",
                          "NIFTY 500", "NIFTY MIDCAP 50",
                          "NIFTY MIDCAP 100", "NIFTY SMLCAP 100",
@@ -88,7 +88,7 @@ class NSEIndices():
         for row in rows:
             # print(row.get_attribute("innerHTML"))
             if "Indices" in row.text:
-                indexCategory = row.text.strip()
+                indexCategory = row.text.strip()[:-2]
                 if indexCategory in categorySkipList:
                     skipCategory = True
                     continue

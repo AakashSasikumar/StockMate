@@ -34,7 +34,8 @@ class RegressorBase():
             currentPath = "/".join(currentPath.split("/")[:-1])
         return currentPath + "/"
 
-    def saveModel(self, savePath="DataStore/SavedModels/Forecasters/"):
+    def saveModel(self, name="", savePath="DataStore/SavedModels/Forecasters/",
+                  modelConfig=None):
         """Saves the model into the specified path.
 
         This function writes the model and some additional details into
@@ -80,6 +81,13 @@ class RegressorBase():
         os.mkdir(savePath)
         with open(savePath + "modelSummary.txt", "w+") as f:
             self.model.summary(print_fn=lambda x: f.write(x + '\n'))
+
+        if modelConfig:
+            tmp = json.loads(self.model.to_json())
+            tmp["name"] = modelConfig["modelName"]
+            tmp["trainConfig"] = {}
+            tmp["trainConfig"] = modelConfig
+
         with open(savePath + "modelConfig.json", "w+") as f:
             f.write(self.model.to_json())
         with open(savePath + "history.pickle", "wb+") as f:

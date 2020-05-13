@@ -6,15 +6,12 @@ import math
 
 
 class BasicLSTM(RegressorBase):
-    """A basic implementation of an LSTM based NN for stock price prediction.
+    """A basic implementation of an LSTM for stock price prediction.
 
     Since this is an LSTM based regressor, the dimensionality of the data can
-    be greater than or equal to 1.
-
-    This model can be used to train on an entire index.
-
-    This model contains 2 LSTM layers with size 200 and 150, along with
-    dropouts, and a Dense layer for the return sequence.
+    be greater than or equal to 1. This model can be used to train on an
+    entire index. This model contains 2 LSTM layers with size 200 and 150,
+    along with dropouts, and a Dense layer for the return sequence.
 
     Attributes
     ----------

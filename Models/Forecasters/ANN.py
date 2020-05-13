@@ -9,11 +9,9 @@ class BasicRegressor(RegressorBase):
     """A basic implementation of an ANN based regressor.
 
     Since this is a ANN based regressor, the training data has to be
-    univariate.
-
-    The model consists of one fully connected layer with output size
-    equal to forecast. This model is usually used to train one single ticker,
-    and is not recommended for learning multiple stock data.
+    univariate. The model consists of one fully connected layer with output
+    size equal to forecast. This model is usually used to train one single
+    ticker, and is not recommended for learning multiple stock data.
 
     Attributes
     ----------
@@ -81,10 +79,8 @@ class DenseRegressor(RegressorBase):
     """A denser ANN implementation for stock price prediction
 
     Since this is a ANN based regressor, the training data has to be
-    univariate.
-
-    This model contains 7 fully connected layers with varying number
-    of neurons with respect to forecast. This model can be used to learn
+    univariate. This model contains 7 fully connected layers with varying
+    number of neurons with respect to forecast. This model can be used to learn
     from multiple tickers. The convertToWindowedDS method is written to handle
     data from multiple tickers.
 

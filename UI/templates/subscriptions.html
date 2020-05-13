@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+
+{%include 'head.html'%}
+
+<body id="page-top">
+
+  <!-- Page Wrapper -->
+  <div id="wrapper">
+
+    <!-- Sidebar -->
+    {% include 'sidebar.html' %}
+    <!-- End of Sidebar -->
+
+    <!-- Content Wrapper -->
+    <div id="content-wrapper" class="d-flex flex-column">
+
+      <!-- Main Content -->
+      <div id="content">
+
+        <!-- Topbar -->
+        <nav class="navbar navbar-expand navbar-light bg-white topbar mb-4 static-top shadow">
+
+          <!-- Sidebar Toggle (Topbar) -->
+          <button id="sidebarToggleTop" class="btn btn-link d-md-none rounded-circle mr-3">
+            <i class="fa fa-bars"></i>
+          </button>
+        </nav>
+        <!-- End of Topbar -->
+
+        <!-- Begin Page Content -->
+        <div class="container-fluid">
+
+          <!-- Page Heading -->
+          <div class="d-sm-flex align-items-center justify-content-between mb-4">
+            <h1 class="h3 mb-0 text-gray-800">Subscriptions</h1>
+          </div>
+          <div class="row">
+
+            <div class="col">
+              <div class="card mb-4">
+                <div class="card-header py-3">
+                  What are subscriptions?
+                </div>
+                <div class="card-body">
+                  <a>Currently there is no support for automated trading, so the next best thing is a personal chatbot 
+                     to tell you when to buy and sell stock. From the <a href="createAgents">Create Agents</a> page, agents 
+                     can be made and subscribed to. Once subscribed, it will send messages regarding what orders are to be placed by you. 
+                     To set this up, you need to download the Telegram chatting application and follow <a href="botFatherInstructions">these 
+                     instructions</a> to set up a bot and provide your api key below.
+                  </a>
+                  <div class="input-group w-50">
+                    <input type="text" id="apiKey" class="form-control bg-light border-0 small" placeholder="Enter API Key here..." aria-describedby="basic-addon2">
+                    <div class="input-group-append">
+                      <button class="btn btn-primary" type="button" onclick="submitAPIKey()">
+                        <i class="fas fa-key fa-sm"></i>
+                      </button>
+                    </div>
+                  </div>
+
+                </div>
+              </div>
+
+              <!-- Basic Card Example -->
+              <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                  <h6 class="m-0 font-weight-bold text-primary">Active Subscriptions</h6>
+                </div>
+                <div class="card-body">
+                  Test
+                </div>
+              </div>
+
+              <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                  <h6 class="m-0 font-weight-bold text-primary">Telegram Bot Details</h6>
+                </div>
+                <div class="card-body">
+                  Test
+                </div>
+              </div>
+
+            </div>
+
+          </div>
+
+        </div>
+        <!-- /.container-fluid -->
+
+      </div>
+      <!-- End of Main Content -->
+
+      <!-- Footer -->
+      <footer class="sticky-footer bg-white">
+        <div class="container my-auto">
+          <div class="copyright text-center my-auto">
+            <span>StockMate :)</span>
+          </div>
+        </div>
+      </footer>
+      <!-- End of Footer -->
+
+    </div>
+    <!-- End of Content Wrapper -->
+
+  </div>
+  <!-- End of Page Wrapper -->
+  {% include 'footerImports.html' %}
+</body>
+
+</html>

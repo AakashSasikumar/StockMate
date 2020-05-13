@@ -7,7 +7,7 @@ import os
 
 def init():
     global source, indices
-    source = AlphaVantage(CONFIG.ALPHA_VANTAGE_API)
+    source = AlphaVantage(CONFIG.ALL_API_KEYS, autoRotate=True)
     indi = Indices.NSEIndices()
     indices = indi.getIndices()
 
