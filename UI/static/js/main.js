@@ -130,8 +130,68 @@ function featureSelected(element) {
     if (!featureSelectorMade) {
         initFeatureSelector()
         featureSelectorMade = true;
+        document.getElementById("featureSelector").style.display = "block";
+        document.getElementById("featureButtons").style.display = "block";
     }
 
     feature = element.value;
     $("#selectedFeatures").tagEditor("addTag", feature);
+}
+
+function modelSubmit() {
+    var model = document.getElementById("forecasterSelection").value;
+    var params = new Object();
+    for (var i = 0; i < allForecasters[model]["params"].length; i++) {
+        param = allForecasters[model]["params"][i];
+        id = param+"ForecasterParam";
+        params[param] = document.getElementById(id).value;
+    }
+    var category = document.getElementById("indexCategory").value;
+    var index = document.getElementById("indexName").value;
+    var stocks = $("#selectedTickers").tagEditor("getTags")[0].tags;
+
+    var features = $("#selectedFeatures").tagEditor("getTags")[0].tags;
+
+    var modelName = document.getElementById("forecasterName").value;
+
+    var payload = new Object();
+    payload["model"] = model;
+    payload["params"] = params;
+    payload["category"] = category;
+    payload["index"] = index;
+    payload["stocks"] = stocks;
+    payload["features"] = features;
+    payload["modelName"] = modelName;
+
+    // TODO:
+    /*
+    1. Implement form validation
+    2. Change jQuery tag editor to something better
+    */
+
+    sendPayload(payload);
+}
+
+function sendPayload(payload) {
+    $.ajax({
+        type: "POST",
+        contentType: "application/json",
+        data: JSON.stringify(payload),
+        dataType: "json",
+        url: "/createForecaster",
+        success: function (e) {
+            handleSuccess(e);
+        },
+        error: function (e) {
+            handleFailure(e);
+        }
+    });
+}
+
+function handleSuccess(e) {
+    console.log(e);
+}
+
+function handleFailure(e) {
+    console.log(e);
 }

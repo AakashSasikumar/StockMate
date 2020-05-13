@@ -43,6 +43,7 @@ def initForecasterDetails(kerasLayers, location="Models/Forecasters",
                         getForecasterDescription(forecaster[1].__doc__)
                     allForecasters[forecasterName]["params"] = \
                         getForecasterParams(forecaster[1].__doc__)
+                    allForecasters[forecasterName]["moduleLoc"] = moduleLoc
 
 
 def getForecasterDescription(docString):

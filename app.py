@@ -1,5 +1,7 @@
 from flask import Flask
 from flask import render_template
+from flask import request
+import json
 
 from Utils import UIInitializer as uint
 
@@ -27,8 +29,8 @@ def myForecasters():
                            pageName=pageName)
 
 
-@app.route("/createForecasters")
-def createForecasters():
+@app.route("/createForecastersPage")
+def createForecastersPage():
     pageName = "Create Forecasters"
     title = "{}-{}".format(websiteName, pageName)
     print()
@@ -38,6 +40,15 @@ def createForecasters():
                            allParams=uint.getUniqueForecasterParams(),
                            indices=uint.getAllIndicesAndConstituents(),
                            allFeatures=uint.getAllFeatures())
+
+
+@app.route("/createForecaster", methods=["POST"])
+def createForecaster():
+    modelData = request.json
+    # TODO
+    # Write method to create the model as specified
+    print(modelData)
+    return json.dumps({'success': True}), 200, {'ContentType': 'application/json'}
 
 
 @app.route("/myAgents")

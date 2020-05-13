@@ -127,10 +127,10 @@
                     <option value="{{featureName}}">{{featureName}}</option>
                     {% endfor %}
                   </select>
-                  <div id="featureSelector">
+                  <div id="featureSelector" style="display: none;">
                     <input id="selectedFeatures"></input>
                   </div>
-                  <div id="tickerSelectorButtons">
+                  <div id="featureButtons" style="display: none;">
                     <button id="featureClear" class="btn btn-primary" type="button" onclick="clearSelectedTickers(this)">
                       Clear All
                     </button>
