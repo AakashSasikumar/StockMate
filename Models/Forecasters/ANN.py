@@ -1,4 +1,4 @@
-from Models.KerasBase import RegressorBase
+from Core.ForecasterBase import RegressorBase
 import tensorflow as tf
 from tensorflow import keras
 from tensorflow.keras.layers import Dense
@@ -15,6 +15,8 @@ class BasicRegressor(RegressorBase):
 
     Attributes
     ----------
+    dataProcessor: Core.DataProcessor
+        The implementation of data processor for this model
     lookBack: int, optional
         Variable to specify how many days to consider when making
         a prediction
@@ -23,12 +25,12 @@ class BasicRegressor(RegressorBase):
     model: keras.models
         The keras model of the ANN
     """
-    def __init__(self, lookBack=4, forecast=1, loadLatest=False):
-        self.lookBack = lookBack
-        self.forecast = forecast
-        self.model = None
+    def __init__(self, dataProcessor, loadLatest=False):
+        self.dataProcessor = dataProcessor
         if loadLatest:
             self.loadModel()
+        self.lookBack = self.dataProcessor.lookBack
+        self.forecast = self.dataProcessor.forecast
 
     def buildModel(self, learningRate=None):
         """Builds the model and sets the class attribute

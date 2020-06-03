@@ -1,4 +1,4 @@
-from Models.KerasBase import RegressorBase
+from Core.ForecasterBase import RegressorBase
 import tensorflow as tf
 from tensorflow import keras
 from tensorflow.keras.layers import Dense, LSTM, Dropout, Conv1D, Conv2D

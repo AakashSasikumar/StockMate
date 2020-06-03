@@ -20,7 +20,7 @@ def getKerasLayers():
 
 
 def initForecasterDetails(kerasLayers, location="Models/Forecasters",
-                          skipList=["NaiveModel", "KerasBase",
+                          skipList=["NaiveModel", "ForecasterBase",
                                     "RegressorBase"]):
     global allForecasters
 

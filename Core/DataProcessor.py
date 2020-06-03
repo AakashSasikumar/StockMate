@@ -1,4 +1,5 @@
 import pandas as pd
+import numpy as np
 
 
 class DataProcessor():
@@ -60,8 +61,21 @@ class DataProcessor():
         data: pd.DataFrame
             The dataframe containing all the specified features
         """
-        # TODO: Implement ways to get other features
-        return data
+        newDF = pd.DataFrame(index=data.index)
+        for feature in self.features:
+            if feature == "open":
+                newDF["open"] = data['open']
+            if feature == "high":
+                newDF["high"] = data["high"]
+            if feature == "low":
+                newDF["low"] == data["low"]
+            if feature == "close":
+                newDF["close"] = data["close"]
+            if feature == "volume":
+                newDF["volume"] = data["volume"]
+            # TODO: Implement ways to get other features using ta-lib
+
+        return newDF
 
     def inputProcessor(self, data, context):
         """Method to process raw ticker data into model-compatible format
@@ -91,10 +105,6 @@ class DataProcessor():
         Y: np.array, optional
             The target for the model (for training). This is required
             if context["isTrain"] is True
-        validationData: tuple,   optional
-            A tuple of validX, validY. This is optional even if
-            context["isTrain"] is True. Providing validationData
-            is recommended as it supports use of callbacks.
         """
         raise NotImplementedError("Must override inputProcessor")
 
@@ -122,8 +132,16 @@ class DataProcessor():
         """
         raise NotImplementedError("Must override outputProcessor")
 
-    def processInput(self, train=True):
+    def getTrainingData(self):
         context = {}
-        context["isTrain"] = train
-        test, train = self.inputProcessor(self.tickerData[self.tickers[0]],
-                                          context)
+        context["isTrain"] = True
+
+        allX = []
+        allY = []
+        for ticker in self.tickers:
+            context["ticker"] = ticker
+            X, Y = self.inputProcessor(self.tickerData, context)
+            allX.extend(X)
+            allY.extend(Y)
+
+        return np.array(allX), np.array(allY)
