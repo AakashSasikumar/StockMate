@@ -35,14 +35,13 @@ class BasicLSTM(RegressorBase):
         ----------
         learningRate: float, optional
             Optional learning to specify for the AdamOptimizer
-
         """
 
         if self.dataProcessor is None:
             message = ("DataProcessor not specified for this model. Either "
                        "load existing model or define a DataProcessor")
             raise Exception(message)
-
+        self.numDims = len(self.dataProcessor.features)
         model = keras.models.Sequential()
         model.add(LSTM(200, input_shape=(self.lookBack, self.numDims),
                        stateful=False, return_sequences=True))

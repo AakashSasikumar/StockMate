@@ -40,10 +40,10 @@ class BasicCNN(RegressorBase):
             message = ("DataProcessor not specified for this model. Either "
                        "load existing model or define a DataProcessor")
             raise Exception(message)
-
+        self.numDims = len(self.dataProcessor.features)
         model = keras.models.Sequential()
         model.add(Conv1D(filters=32, kernel_size=2, strides=1,
-                         input_shape=[self.lookBack, 1],
+                         input_shape=[self.lookBack, self.numDims],
                          padding="causal", activation='relu'))
         model.add(keras.layers.LSTM(32, return_sequences=True))
         model.add(keras.layers.LSTM(32, return_sequences=True))
@@ -53,6 +53,6 @@ class BasicCNN(RegressorBase):
         else:
             optimizer = keras.optimizers.Adam()
         model.compile(loss="mse", optimizer=optimizer,
-                      metrics=["mae"])
+                      metrics=["mse"])
 
         self.model = model
