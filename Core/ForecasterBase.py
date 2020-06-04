@@ -117,10 +117,11 @@ class RegressorBase():
         """
         savePath = self.getProjectRoot() + savePath
         modelName = self.__class__.__name__
-        savePath += modelName
-        if name not in os.listdir(savePath):
-            message = "Could not find {}".format(name)
+        modelPath = savePath + modelName
+        if name not in os.listdir(modelPath):
+            message = "Could not find {} in {}".format(name, savePath)
             raise Exception(message)
+        savePath = modelPath
         savePath = "{}/{}".format(savePath, name)
         model, dp = RegressorBase.loadAll(savePath)
         self.model = model
