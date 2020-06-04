@@ -1,11 +1,7 @@
-import tensorflow as tf
 from tensorflow import keras
 import os
-import datetime
 import pickle
-import json
 import dill
-import numpy as np
 
 
 class RegressorBase():
@@ -88,10 +84,11 @@ class RegressorBase():
             os.mkdir(savePath + modelName)
         savePath = savePath + modelName
 
+        modelPath = "{}/{}/".format(savePath, name)
         if name not in os.listdir(savePath):
-            os.mkdir(savePath)
+            os.mkdir(modelPath)
 
-        savePath = "{}/{}/".format(savePath, name)
+        savePath = modelPath
         with open(savePath + "modelSummary.txt", "w+") as f:
             self.model.summary(print_fn=lambda x: f.write(x + '\n'))
 
@@ -99,7 +96,8 @@ class RegressorBase():
             f.write(self.model.to_json())
         with open(savePath + "history.pickle", "wb+") as f:
             pickle.dump(self.history, f)
-        self.model.save(savePath + "model", save_format="tf")
+        self.model.save(savePath + "model", save_format="tf",
+                        include_optimizer=True)
         with open(savePath + "dataProcessor.dill", "wb+") as f:
             dill.dump(self.dataProcessor, f)
 
@@ -187,7 +185,7 @@ class RegressorBase():
 
         X, Y = self.dataProcessor.getTrainingData()
 
-        history = self.model.fit(x=np.array(X), y=np.array(Y), epochs=epochs,
+        history = self.model.fit(x=X, y=Y, epochs=epochs,
                                  callbacks=callbacks, batch_size=32,
                                  validation_split=validationSplit)
         self.history = history.history

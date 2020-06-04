@@ -133,15 +133,17 @@ class DataProcessor():
         raise NotImplementedError("Must override outputProcessor")
 
     def getTrainingData(self):
-        context = {}
-        context["isTrain"] = True
+        """Method specifying how to prepare training data
 
-        allX = []
-        allY = []
-        for ticker in self.tickers:
-            context["ticker"] = ticker
-            X, Y = self.inputProcessor(self.tickerData, context)
-            allX.extend(X)
-            allY.extend(Y)
+        This method must be overrod by a child class, as this method
+        may differ for differt models
 
-        return np.array(allX), np.array(allY)
+        Returns
+        -------
+        allX: np.array
+            The input for the model
+        allY: np.array
+            The target for the model
+        """
+
+        raise NotImplementedError("Must override getTrainingData")

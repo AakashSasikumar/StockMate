@@ -1,8 +1,6 @@
 from Core.ForecasterBase import RegressorBase
-import tensorflow as tf
 from tensorflow import keras
 from tensorflow.keras.layers import Dense
-import math
 
 
 class BasicRegressor(RegressorBase):
@@ -38,7 +36,8 @@ class BasicRegressor(RegressorBase):
 
         """
         if self.dataProcessor is None:
-            message = "DataProcessor not specified for this model"
+            message = ("DataProcessor not specified for this model. Either "
+                       "load existing model or define a DataProcessor")
             raise Exception(message)
 
         model = keras.models.Sequential()
@@ -84,6 +83,11 @@ class DenseRegressor(RegressorBase):
             Optional learning to specify for the AdamOptimizer
 
         """
+        if self.dataProcessor is None:
+            message = ("DataProcessor not specified for this model. Either "
+                       "load existing model or define a DataProcessor")
+            raise Exception(message)
+
         model = keras.models.Sequential()
         model.add(keras.layers.Dense(self.lookBack,
                                      input_shape=[self.lookBack]))
