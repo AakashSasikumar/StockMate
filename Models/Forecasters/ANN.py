@@ -1,8 +1,6 @@
-from Models.KerasBase import RegressorBase
-import tensorflow as tf
+from Core.ForecasterBase import RegressorBase
 from tensorflow import keras
 from tensorflow.keras.layers import Dense
-import math
 
 
 class BasicRegressor(RegressorBase):
@@ -15,6 +13,8 @@ class BasicRegressor(RegressorBase):
 
     Attributes
     ----------
+    dataProcessor: Core.DataProcessor
+        The implementation of data processor for this model
     lookBack: int, optional
         Variable to specify how many days to consider when making
         a prediction
@@ -23,12 +23,8 @@ class BasicRegressor(RegressorBase):
     model: keras.models
         The keras model of the ANN
     """
-    def __init__(self, lookBack=4, forecast=1, loadLatest=False):
-        self.lookBack = lookBack
-        self.forecast = forecast
-        self.model = None
-        if loadLatest:
-            self.loadModel()
+    def __init__(self):
+        self.dataProcessor = None
 
     def buildModel(self, learningRate=None):
         """Builds the model and sets the class attribute
@@ -39,6 +35,11 @@ class BasicRegressor(RegressorBase):
             Optional learning to specify for the AdamOptimizer
 
         """
+        if self.dataProcessor is None:
+            message = ("DataProcessor not specified for this model. Either "
+                       "load existing model or define a DataProcessor")
+            raise Exception(message)
+
         model = keras.models.Sequential()
         model.add(Dense(self.forecast, input_shape=[self.lookBack]))
         if learningRate:
@@ -49,30 +50,6 @@ class BasicRegressor(RegressorBase):
         model.compile(loss="mean_squared_error", optimizer=optimizer,
                       metrics=['mse'])
         self.model = model
-
-    def convertToWindowedDS(self, data, batchSize=32):
-        """Converts series data into windows for training
-
-        Parameters
-        ----------
-        data: pd.Series
-            The data to be converted into windowed form
-        batchSize: int, optional
-            The batchsize for the resulting windowed dataset
-
-        Returns
-        -------
-        ds: tf.Dataset
-            The windowed dataset
-        """
-        ds = tf.data.Dataset.from_tensor_slices(data)
-        ds = ds.window(self.lookBack + self.forecast,
-                       shift=self.forecast, drop_remainder=True)
-        ds = ds.flat_map(lambda w: w.batch(self.lookBack + self.forecast))
-        ds = ds.shuffle(len(data))
-        ds = ds.map(lambda w: (w[:-self.forecast], w[-self.forecast:]))
-        ds = ds.batch(batchSize).prefetch(1)
-        return ds
 
 
 class DenseRegressor(RegressorBase):
@@ -94,12 +71,8 @@ class DenseRegressor(RegressorBase):
     model: keras.models
         The keras model of the ANN
     """
-    def __init__(self, lookBack=4, forecast=1, loadLatest=False):
-        self.lookBack = lookBack
-        self.forecast = forecast
-        self.model = None
-        if loadLatest:
-            self.loadModel()
+    def __init__(self):
+        self.dataProcessor = None
 
     def buildModel(self, learningRate=None):
         """Builds the model and sets the class attribute
@@ -110,6 +83,11 @@ class DenseRegressor(RegressorBase):
             Optional learning to specify for the AdamOptimizer
 
         """
+        if self.dataProcessor is None:
+            message = ("DataProcessor not specified for this model. Either "
+                       "load existing model or define a DataProcessor")
+            raise Exception(message)
+
         model = keras.models.Sequential()
         model.add(keras.layers.Dense(self.lookBack,
                                      input_shape=[self.lookBack]))
@@ -131,71 +109,3 @@ class DenseRegressor(RegressorBase):
                       metrics=['mse'])
 
         self.model = model
-
-    def convertToWindows(self, data):
-        """Method to convert the given ticker data into windows.
-
-        This method deals with individual ticker data and converts them to
-        windows that can be later concatenated with other ticker data.
-
-        Parameters
-        ----------
-        data: pd.Series()
-            The ticker data
-        """
-        ds = tf.data.Dataset.from_tensor_slices(data)
-        ds = ds.window(self.lookBack + self.forecast, shift=self.forecast,
-                       drop_remainder=True)
-        ds = ds.flat_map(lambda w: w.batch(self.lookBack + self.forecast))
-        ds = ds.map(lambda w: (w[:-self.forecast], w[-self.forecast:]))
-        return ds
-
-    def convertToWindowedDS(self, data, splitRatio=0.7, batchSize=32,
-                            columns=None):
-        """Method to convert the given dataset into windowed form for training.
-
-        Parameters
-        ----------
-        data: pd.DataFrame()
-            The input data. This can have multiple columns for multiple
-            tickers.
-        splitRatio: float, optional
-            The train, validation split ratio for the input data
-        batchSize: int, optional
-            The batchsize for the resultant windowed dataset
-
-        Returns
-        -------
-        trainDS: tf.Dataset
-            The windowed form of the respective amount of data for training
-        validDS: tf.Dataset
-            The windowed form of the respective amount of data for validation
-        """
-        lenTrain = 0
-        lenValid = 0
-        if isinstance(columns, list):
-            cols = columns
-        else:
-            cols = list(data.columns)
-        for i, ticker in enumerate(cols):
-            values = data[ticker].values
-            splitInd = math.floor(splitRatio * len(values))
-            train = values[:splitInd]
-            valid = values[splitInd:]
-            lenTrain += len(train)
-            lenValid += len(valid)
-
-            if i == 0:
-                trainDS = self.convertToWindows(train)
-                validDS = self.convertToWindows(valid)
-            else:
-                tmpTrain = self.convertToWindows(train)
-                tmpValid = self.convertToWindows(valid)
-                trainDS.concatenate(tmpTrain)
-                validDS.concatenate(tmpValid)
-        trainDS = trainDS.shuffle(lenTrain)
-        validDS = validDS.shuffle(lenValid)
-        trainDS = trainDS.batch(batchSize).prefetch(1)
-        validDS = validDS.batch(batchSize).prefetch(1)
-
-        return trainDS, validDS

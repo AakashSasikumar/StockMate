@@ -1,9 +1,7 @@
-import tensorflow as tf
 from tensorflow import keras
 import os
-import datetime
 import pickle
-import json
+import dill
 
 
 class RegressorBase():
@@ -34,15 +32,22 @@ class RegressorBase():
             currentPath = "/".join(currentPath.split("/")[:-1])
         return currentPath + "/"
 
-    def saveModel(self, name="", savePath="DataStore/SavedModels/Forecasters/",
-                  modelConfig=None):
+    def saveModel(self, name,
+                  savePath="DataStore/SavedModels/Forecasters/"):
         """Saves the model into the specified path.
+
+        NOTE: If name already exists in the directory, calling saveModel
+        will overwrite the existing saved files.
 
         This function writes the model and some additional details into
         the specified location. The directory naming convention is as
         follows,
 
         directoryName = yyyy-mm-dd@HH:MM
+
+        if name is provided,
+
+        directoryName = {name}.yyy-mm-dd@HH:MM
 
         This method saves the following things:
         1. modelSummary.txt
@@ -54,10 +59,16 @@ class RegressorBase():
         3. modelConfig.json
             This file contains the model configuration. This can be used
             later to replicate the model without the trained parameters
+        4. model
+            The trained model
+        5. dataProcessor
+            The data processor used for this model
 
         Parameters
         ----------
-        savePath: str
+        name: str
+            An optional personal name given to the model
+        savePath: str, optional
             The location which the model and additional info are to be saved
 
         """
@@ -73,29 +84,24 @@ class RegressorBase():
             os.mkdir(savePath + modelName)
         savePath = savePath + modelName
 
-        saveDateTime = str(datetime.datetime.now())[:-10].replace(" ", "@")
-        if saveDateTime in os.listdir(savePath):
-            message = "model already exists for this datetime"
-            raise Exception(message)
-        savePath = "{}/{}/".format(savePath, saveDateTime)
-        os.mkdir(savePath)
+        modelPath = "{}/{}/".format(savePath, name)
+        if name not in os.listdir(savePath):
+            os.mkdir(modelPath)
+
+        savePath = modelPath
         with open(savePath + "modelSummary.txt", "w+") as f:
             self.model.summary(print_fn=lambda x: f.write(x + '\n'))
-
-        if modelConfig:
-            tmp = json.loads(self.model.to_json())
-            tmp["name"] = modelConfig["modelName"]
-            tmp["trainConfig"] = {}
-            tmp["trainConfig"] = modelConfig
 
         with open(savePath + "modelConfig.json", "w+") as f:
             f.write(self.model.to_json())
         with open(savePath + "history.pickle", "wb+") as f:
             pickle.dump(self.history, f)
-        self.model.save(savePath + "model", save_format="tf")
+        self.model.save(savePath + "model", save_format="tf",
+                        include_optimizer=True)
+        with open(savePath + "dataProcessor.dill", "wb+") as f:
+            dill.dump(self.dataProcessor, f)
 
-    def loadModel(self, savePath="DataStore/SavedModels/Forecasters/",
-                  date=False):
+    def loadModel(self, name, savePath="DataStore/SavedModels/Forecasters/"):
         """Loads the specified model.
 
         This method is just for preparing the input and exception
@@ -105,32 +111,22 @@ class RegressorBase():
         ----------
         savePath: str, optional
             The location from which the model is to loaded
-        date: str, optional
+        name: str
             Used to specify a certain date. If none, loads the latest. This has
             to be the folder name of the saved model.
         """
         savePath = self.getProjectRoot() + savePath
         modelName = self.__class__.__name__
         savePath += modelName
-        if not date:
-            if len(os.listdir(savePath)) == 0:
-                message = "no saved models present"
-                raise Exception(message)
-            latestSave = sorted(os.listdir(savePath),
-                                key=lambda x: self.getDatetime(x))[-1]
-            savePath = "{}/{}".format(savePath, latestSave)
-            self.loadAll(savePath)
-        elif isinstance(date, str):
-            allSaves = os.listdir(savePath)
-            if date not in allSaves:
-                # Raising exception as directory not present in savePath
-                message = "{} not in specified location {}".format(date,
-                                                                   savePath)
-                raise Exception(message)
-            else:
-                self.loadAll("{}/{}".format(savePath, date))
+        if name not in os.listdir(savePath):
+            message = "Could not find {}".format(name)
+            raise Exception(message)
+        savePath = "{}/{}".format(savePath, name)
+        model, dp = RegressorBase.loadAll(savePath)
+        self.model = model
+        self.dataProcessor = dp
 
-    def loadAll(self, path):
+    def loadAll(path):
         """Loads the specified model
 
         This method loads the model and other attributes when the
@@ -141,41 +137,33 @@ class RegressorBase():
         path: str
             The path of the model
         """
-        self.model = keras.models.load_model(path+"/model")
-        with open(path + "/modelConfig.json") as f:
-            config = json.load(f)
-        firstLayerConfig = config['config']['layers'][0]['config']
-        lastLayerConfig = config['config']['layers'][-1]['config']
-        self.lookBack = firstLayerConfig['batch_input_shape'][-1]
-        self.forecast = lastLayerConfig['units']
+        model = keras.models.load_model(path+"/model")
+        with open(path + "/dataProcessor.dill", "rb") as f:
+            dataProcessor = dill.load(f)
+        return model, dataProcessor
 
-    def getDatetime(self, date):
-        """Helper function used to convert the file naming convention
-        into a datetime.datetime object
+    def assignDataProcessor(self, dataProcessor):
+        """Method to assign the dataProcessor
 
         Parameters
         ----------
-        date: str
-            The string form of the directory
-
-        Returns
-        -------
-        dt: datetime.datetime
-            The corresponding datetime object
+        dataProcessor: Object
+            The child of Core.DataProcessor with all methods
+            implemented
         """
-        dt = datetime.datetime.strptime(date, "%Y-%m-%d@%H:%M")
-        return dt
+        self.dataProcessor = dataProcessor
+        self.lookBack = self.dataProcessor.lookBack
+        self.forecast = self.dataProcessor.forecast
 
-    def train(self, trainDS, validDS, epochs=1000, earlyStopping=True,
-              patience=15, callbacks=[]):
+    def train(self, validationSplit=0.7, epochs=1000, earlyStopping=True,
+              patience=15, callbacks=[], batchSize=32):
         """The method to start training the model
 
-        Parameters:
+        Parameters
         ----------
-        trainDS: tf.Dataset
-            The object containing all the training data
-        validDS: tf.Dataset
-            The object containing all the validation data
+        validationSplit: float
+            The ratio in which the input data has to be split into
+            training and validation.
         epochs: int, optional
             The number of epochs to train for
         earlyStopping: boolean, optional
@@ -186,16 +174,23 @@ class RegressorBase():
         callbacks: list
             custom callbacks may be specified for training
         """
+        if self.dataProcessor is None:
+            message = "DataProcessor not specified for this model"
+            raise Exception(message)
+
         keras.backend.clear_session()
         if earlyStopping:
             callback = keras.callbacks.EarlyStopping(patience=patience)
             callbacks.append(callback)
-        history = self.model.fit(trainDS, epochs=epochs,
-                                 validation_data=validDS,
-                                 callbacks=callbacks)
+
+        X, Y = self.dataProcessor.getTrainingData()
+
+        history = self.model.fit(x=X, y=Y, epochs=epochs,
+                                 callbacks=callbacks, batch_size=32,
+                                 validation_split=validationSplit)
         self.history = history.history
 
-    def makePredictions(self, data, batchSize=1):
+    def makePredictions(self, data, context):
         """Formats the data and returns the model prediction
 
         This method takes in the raw data, and converts it into the model's
@@ -213,9 +208,7 @@ class RegressorBase():
         prediction: numpy.ndarray
             The model's prediction
         """
-        ds = tf.data.Dataset.from_tensor_slices(data)
-        ds = ds.window(self.lookBack, shift=self.forecast, drop_remainder=True)
-        ds = ds.flat_map(lambda w: w.batch(self.lookBack))
-        ds = ds.batch(batchSize).prefetch(1)
-        prediction = self.model.predict(ds)
-        return prediction
+        context["isTrain"] = False
+        procInput = self.dataProcessor.inputProcessor(data, context)
+        prediction = self.model.predict(procInput)
+        return self.dataProcessor.outputProcessor(prediction, context)
