@@ -8,7 +8,7 @@ A python based tool to build agents and models for stock price forecasting and t
 
 1. [Getting Started](#Getting-Started)
     - [Prerequisites](#Prerequisites)
-2. [What is StockMate?](#What-is-StockMate?)
+2. [What is StockMate?](#What-is-StockMate)
     - [Terminology](#Terminology)
     - [Features](#Features)
     - [Planned Features](#Planned-Features)
