@@ -1,8 +1,5 @@
 from Core.ForecasterBase import RegressorBase
-import tensorflow as tf
 from tensorflow import keras
-from tensorflow.keras.layers import Dense, LSTM, Dropout, Conv1D, Conv2D
-import math
 
 
 class BasicCNN(RegressorBase):
@@ -42,9 +39,9 @@ class BasicCNN(RegressorBase):
             raise Exception(message)
         self.numDims = len(self.dataProcessor.features)
         model = keras.models.Sequential()
-        model.add(Conv1D(filters=32, kernel_size=2, strides=1,
-                         input_shape=[self.lookBack, self.numDims],
-                         padding="causal", activation='relu'))
+        model.add(keras.layers.Conv1D(filters=32, kernel_size=2, strides=1,
+                  input_shape=[self.lookBack, self.numDims],
+                  padding="causal", activation='relu'))
         model.add(keras.layers.LSTM(32, return_sequences=True))
         model.add(keras.layers.LSTM(32, return_sequences=True))
         model.add(keras.layers.Dense(1))
