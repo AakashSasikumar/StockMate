@@ -7,8 +7,15 @@ A python based tool to build agents and models for stock price forecasting and t
 ## Table of Contents
 
 1. [Getting Started](#Getting-Started)
+    - [Prerequisites](#Prerequisites)
 2. [What is StockMate?](#What-is-StockMate?)
+    - [Terminology](#Terminology)
+    - [Features](#Features)
+    - [Planned Features](#Planned-Features)
 3. [Usage](#Usage)
+    - [Setup](#Setup)
+    - [Saving Stock Data](#Saving-Stock-Data)
+    - [Forecaster Creation](#Forecaster-Creation)
 
 ## Getting Started
 
@@ -18,9 +25,10 @@ A python based tool to build agents and models for stock price forecasting and t
 2. selenium
 3. phantomjs driver
 4. tensorflow 2.0 or greater
+    - As of June 5th 2020, tensorflow 2.0 has an error when loading a saved model containing LSTM layers. So the workaround for this is to install tf-nightly as they have patched this in this version.
 5. lxml
 
-## What is StockMate?
+## What is StockMate
 
 StockMate is a Python based tool where you can create models for stock price prediction and trade automation. Using StockMate you can use the provided APIs to get the latest stock data, build and test models for forecasting, etc. Currently StockMate's data retrieval is built around India's National Stock Exchange (NSE), and support for other exchanges isn't built yet.
 
@@ -166,7 +174,7 @@ for stock in constituents:
 
 - AutoRotate is a feature that takes a list of api keys and rotates them so that the daily limit can be breached. It also scrapes a list of proxy addresses so that AlphaVantage doesn't block the source IP.
 
-#### 3. Forecaster Creation
+### Forecaster Creation
 
 ```python
 from DataStore import Indices
