@@ -114,6 +114,14 @@
                   <h6 class="m-0 font-weight-bold text-primary">3. Choose The Features</h6>
                 </div>
                 <div class="card-body">
+                  <div class="block">
+                    <label for="lookBack" style="display: inline-block;width: 120px;">lookBack</label>
+                    <input id="lookBack" type="number" class="form-control2 bg-light border-0 small" aria-describedby="basic-addon2">
+                  </div>
+                  <div class="block">
+                    <label for="forecast" style="display: inline-block;width: 120px;">forecast</label>
+                    <input id="forecast" type="number" class="form-control2 bg-light border-0 small" aria-describedby="basic-addon2">
+                  </div>
                   <label for="featureSelection">Feature Selection</label>
                   <select id="featureSelection" class="form-control2 bg-light border-0 small" onchange="featureSelected(this)">
                     {% for featureName in allFeatures %}

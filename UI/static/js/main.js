@@ -144,6 +144,8 @@ function modelSubmit() {
     var index = document.getElementById("indexName").value;
     var stocks = $("#selectedTickers").tagEditor("getTags")[0].tags;
 
+    var lookBack = document.getElementById("lookBack").value;
+    var forecast = document.getElementById("forecast").value;
     var features = $("#selectedFeatures").tagEditor("getTags")[0].tags;
     var targetFeature = document.getElementById("targetFeature").value;
     var modelName = document.getElementById("forecasterName").value;
@@ -155,6 +157,8 @@ function modelSubmit() {
     payload["category"] = category;
     payload["index"] = index;
     payload["tickers"] = stocks;
+    payload["lookBack"] = lookBack;
+    payload["forecast"] = forecast;
     payload["features"] = features;
     payload["targetFeature"] = targetFeature;
     payload["modelName"] = modelName;
@@ -166,6 +170,9 @@ function modelSubmit() {
     */
 
     sendPayload(payload, "/createForecaster");
+    alert("Forecaster creation job has been sent, check your telegram " +
+          "bot for updates. Once model creation in done, it will " +
+          "automatically show up in myForecasters.")
 }
 
 function sendPayload(payload, url) {

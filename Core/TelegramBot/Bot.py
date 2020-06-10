@@ -1,12 +1,12 @@
 import json
-from telegram.ext import Updater, CommandHandler
+from telegram.ext import Updater, CommandHandler, MessageHandler
 import warnings
-
+from Core.TelegramBot.CustomFilters import retrainReplyFilter
+from Utils import RequestHandler as rh
+from threading import Thread
 
 with open("telegramAPIData.json") as f:
     apiData = json.load(f)
-
-RESET_ROOT = False
 
 
 def init():
@@ -22,7 +22,14 @@ def init():
     else:
         root = apiData["rootID"]
 
+    initCustomFilters()
     assignHandlers()
+
+
+def initCustomFilters():
+    global retrainFilter
+
+    retrainFilter = retrainReplyFilter()
 
 
 def assignHandlers():
@@ -30,22 +37,23 @@ def assignHandlers():
 
     dp.add_handler(CommandHandler("start", start))
     dp.add_handler(CommandHandler("iamroot", iAmRoot))
+    dp.add_handler(MessageHandler(retrainFilter, retrainLastModel))
 
 
 def start(update, context):
     chatID = update["message"]["chat"]["id"]
     if root is None:
         suffix = ("Looks like the root user isn't set. Send "
-                  "/iamroot to make yourself the root.")
+                  "/iamroot to make yourself the root")
     elif chatID == root:
         suffix = ("If you have subscribed to any trading agents, "
                   "I will send you updates on when to buy and sell."
                   "Also, I will give you updates on any train jobs"
-                  "you may have set.")
+                  "you may have set")
     elif chatID != root:
         suffix = ("Looks like you are not the root user. If you want"
                   " to become root, click on the reset root button on"
-                  "your subscriptions page, and send /iamroot to me.")
+                  "your subscriptions page, and send /iamroot to me")
 
     message = "Hi, this is your StockMate bot. {}"
     update.message.reply_text(message.format(suffix))
@@ -56,14 +64,14 @@ def iAmRoot(update, context):
     if root is None:
         message = ("Alright, you have now been set as the root."
                    "You will now get updates on train jobs, "
-                   "and agent subscriptions.")
+                   "and agent subscriptions")
         saveRoot(chatID)
     elif root == chatID:
-        message = ("You are already the root.")
+        message = ("You are already the root")
     elif root != chatID:
         message = ("Looks like you are not the root user. If you want"
                    " to become root, click on the reset root button on"
-                   "your subscriptions page, and try again.")
+                   "your subscriptions page, and try again")
     update.message.reply_text(message)
 
 
@@ -83,7 +91,11 @@ def sendMessage(message):
 def resetRoot():
     global root
     root = None
-    sendMessage("Root has been reset. You are not the root anymore.")
+    sendMessage("Root has been reset. You are not the root anymore")
+
+
+def retrainLastModel(update, context):
+    Thread(rh.retrainForecaster()).start()
 
 
 def startListening():
