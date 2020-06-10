@@ -4,7 +4,8 @@ from flask import request
 import json
 
 from Utils import UIInitializer as uint
-
+from Utils import UIRequestHandler as urh
+import Core.Bot.TelegramBot as tbot
 
 app = Flask(__name__, template_folder="UI/templates",
             static_folder="UI/static")
@@ -14,6 +15,8 @@ websiteName = "StockMate"
 
 def init():
     uint.init()
+    tbot.init()
+    tbot.startListening()
 
 
 @app.route("/")
@@ -37,7 +40,6 @@ def createForecastersPage():
     return render_template("createForecasters.html", title=title,
                            pageName=pageName,
                            allModels=uint.allForecasters,
-                           allParams=uint.getUniqueForecasterParams(),
                            indices=uint.getAllIndicesAndConstituents(),
                            allFeatures=uint.getAllFeatures())
 
@@ -70,8 +72,10 @@ def createAgents():
 def subscriptions():
     pageName = "Create Forecasters"
     title = "{}-{}".format(websiteName, pageName)
+
     return render_template("subscriptions.html", title=title,
-                           pageName=pageName)
+                           pageName=pageName,
+                           apiKey=uint.getTelegramAPIKey())
 
 
 @app.route("/botFatherInstructions")
@@ -80,6 +84,19 @@ def botCreation():
     title = "{}-{}".format(websiteName, pageName)
     return render_template("botFatherInstructions.html", title=title,
                            pageName=pageName)
+
+
+@app.route("/submitTelegramAPIKey", methods=["POST"])
+def submitTelegramAPIKey():
+    apiKey = request.json["apiKey"]
+    urh.saveTelegramAPIKey(apiKey)
+    return json.dumps({'success': True}), 200, {'ContentType': 'application/json'}
+
+
+@app.route("/resetTelegramRoot", methods=["POST"])
+def resetRoot():
+    urh.resetTelegramRoot()
+    return json.dumps({'success': True}), 200, {'ContentType': 'application/json'}
 
 
 @app.errorhandler(404)

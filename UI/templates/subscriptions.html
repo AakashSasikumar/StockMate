@@ -50,13 +50,22 @@
                      instructions</a> to set up a bot and provide your api key below.
                   </a>
                   <div class="input-group w-50">
+                    {% if not apiKey %}
                     <input type="text" id="apiKey" class="form-control bg-light border-0 small" placeholder="Enter API Key here..." aria-describedby="basic-addon2">
+                    {% else %}
+                    <input type="text" id="apiKey" class="form-control bg-light border-0 small" value="{{apiKey}}" aria-describedby="basic-addon2">
+                    {% endif %}
                     <div class="input-group-append">
                       <button class="btn btn-primary" type="button" onclick="submitAPIKey()">
-                        <i class="fas fa-key fa-sm"></i>
+                        Submit
                       </button>
                     </div>
                   </div>
+                  <button class="btn btn-primary" type="button" onclick="resetRoot()">
+                    Reset Root
+                  </button>
+                  <i class="fas fa-info-circle"></i>
+                  <a>Only click this if you want to change ownership of this chatbot</a>
 
                 </div>
               </div>

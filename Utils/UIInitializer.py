@@ -4,6 +4,7 @@ import sys
 import importlib
 import inspect
 from tensorflow import keras
+import json
 
 
 def init():
@@ -20,8 +21,8 @@ def getKerasLayers():
 
 
 def initForecasterDetails(kerasLayers, location="Models/Forecasters",
-                          skipList=["NaiveModel", "ForecasterBase",
-                                    "RegressorBase"]):
+                          skipList=["NaiveModel", "BasicRegressor",
+                                    "DenseRegressor", "RegressorBase"]):
     global allForecasters
 
     allForecasters = {}
@@ -81,8 +82,16 @@ def getAllIndicesAndConstituents():
 
 def getAllFeatures():
     # currently only these are supported
-    features = ["Open", "High", "Low", "Close", "Volume"]
+    features = ["open", "high", "low", "close", "volume"]
     return features
+
+
+def getTelegramAPIKey():
+    if "telegramAPIData.json" not in os.listdir():
+        return False
+    else:
+        with open("telegramAPIData.json") as f:
+            return json.load(f)["apiKey"]
 
 
 if __name__ == "__main__":
