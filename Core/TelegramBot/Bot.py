@@ -95,7 +95,8 @@ def resetRoot():
 
 
 def retrainLastModel(update, context):
-    Thread(rh.retrainForecaster()).start()
+    if update["message"].text.lower() in ["yes", "y"]:
+        Thread(rh.retrainForecaster()).start()
 
 
 def startListening():

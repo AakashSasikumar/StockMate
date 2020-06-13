@@ -122,8 +122,7 @@ def retrainForecaster():
     model = getForecasterClass(moduleLoc, model)
     model = model()
     model.loadModel(modelName)
-    print("asdfasdf")
-
+    tbot.sendMessage("Retraining {}".format(modelName))
     history = trainAndSaveForecaster(model,
                                      lastTrainedModelData["modelName"])
 

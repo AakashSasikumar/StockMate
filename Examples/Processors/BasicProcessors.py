@@ -249,4 +249,3 @@ class MultiVarProcessor(DataProcessor):
             finalAr.append(array[start:end])
             start = end
         return finalAr
-
