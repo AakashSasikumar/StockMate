@@ -56,7 +56,7 @@ class BasicLSTM(RegressorBase):
             optimizer = keras.optimizers.Adam()
 
         model.compile(optimizer=optimizer, loss=keras.losses.Huber(),
-                      metrics=['mse'])
+                      metrics=['mse', 'mae'])
 
         self.model = model
 

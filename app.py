@@ -49,7 +49,6 @@ def createForecastersPage():
 def createForecaster():
     modelData = request.json
     Thread(urh.createForecaster(modelData)).start()
-    print(tbot.retrainFilter.toggleRetrain)
     return (json.dumps({'success': True}), 200,
             {'ContentType': 'application/json'})
 

@@ -48,7 +48,7 @@ class BasicRegressor(RegressorBase):
             optimizer = keras.optimizers.Adam()
 
         model.compile(loss="mean_squared_error", optimizer=optimizer,
-                      metrics=['mse'])
+                      metrics=['mse', "mae"])
         self.model = model
 
 
@@ -97,15 +97,12 @@ class DenseRegressor(RegressorBase):
         model.add(keras.layers.Dense(self.forecast*3))
         model.add(keras.layers.Dense(self.forecast*2))
         model.add(keras.layers.Dense(self.forecast))
-        # optimizer = keras.optimizers.RMSprop(lr=learningRate)
         if learningRate:
             optimizer = keras.optimizers.Adam(lr=learningRate)
         else:
             optimizer = keras.optimizers.Adam()
 
-    #     model.compile(loss="mean_squared_error", optimizer=optimizer,
-    #                   metrics=['mse'])
         model.compile(loss=keras.losses.Huber(), optimizer=optimizer,
-                      metrics=['mse'])
+                      metrics=['mse', "mae"])
 
         self.model = model
