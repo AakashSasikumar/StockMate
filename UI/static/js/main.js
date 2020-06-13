@@ -1,14 +1,19 @@
 function submitAPIKey() {
     //TODO:
     // Finish implementing this..
-    apiKey = document.getElementById("apiKey").value;
-    console.log(apiKey)
-    console.log("To be implemented...")
+    var apiKey = document.getElementById("apiKey").value;
+    var payload = new Object();
+    payload["apiKey"] = apiKey;
+
+    sendPayload(payload, "/submitTelegramAPIKey")
+}
+
+function resetRoot() {
+    sendPayload(new Object(), "/resetTelegramRoot")
 }
 
 function forecasterSelected() {
     showForecasterDescription();
-    showForecasterParams();
 }
 
 function showForecasterDescription() {
@@ -23,18 +28,6 @@ function showForecasterDescription() {
             else {
                 element.style.display = "none";
             }
-        }
-    }
-}
-
-function showForecasterParams() {
-    var selectedModel = document.getElementById("forecasterSelection").value;
-    var modelParams = allForecasters[selectedModel]["params"];
-    for (var i = 0; i < allForecasterParams.length; i++) {
-        paramDivID = allForecasterParams[i]+"ForecasterParamDiv";
-        document.getElementById(paramDivID).style.display = "none";
-        if (modelParams.includes(allForecasterParams[i])) {
-            document.getElementById(paramDivID).style.display = "block";
         }
     }
 }
@@ -126,6 +119,8 @@ function initFeatureSelector() {
       });
 }
 
+var targetFeatureShown = false;
+
 function featureSelected(element) {
     if (!featureSelectorMade) {
         initFeatureSelector()
@@ -136,31 +131,36 @@ function featureSelected(element) {
 
     feature = element.value;
     $("#selectedFeatures").tagEditor("addTag", feature);
+
+    if (!targetFeatureShown) {
+        document.getElementById("targetFeatureDiv").style.display = "block";
+    }
 }
 
 function modelSubmit() {
     var model = document.getElementById("forecasterSelection").value;
-    var params = new Object();
-    for (var i = 0; i < allForecasters[model]["params"].length; i++) {
-        param = allForecasters[model]["params"][i];
-        id = param+"ForecasterParam";
-        params[param] = document.getElementById(id).value;
-    }
+
     var category = document.getElementById("indexCategory").value;
     var index = document.getElementById("indexName").value;
     var stocks = $("#selectedTickers").tagEditor("getTags")[0].tags;
 
+    var lookBack = document.getElementById("lookBack").value;
+    var forecast = document.getElementById("forecast").value;
     var features = $("#selectedFeatures").tagEditor("getTags")[0].tags;
-
+    var targetFeature = document.getElementById("targetFeature").value;
     var modelName = document.getElementById("forecasterName").value;
 
     var payload = new Object();
+    console.log(allForecasters[model])
     payload["model"] = model;
-    payload["params"] = params;
+    payload["moduleLoc"] = allForecasters[model]["moduleLoc"]
     payload["category"] = category;
     payload["index"] = index;
-    payload["stocks"] = stocks;
+    payload["tickers"] = stocks;
+    payload["lookBack"] = lookBack;
+    payload["forecast"] = forecast;
     payload["features"] = features;
+    payload["targetFeature"] = targetFeature;
     payload["modelName"] = modelName;
 
     // TODO:
@@ -169,16 +169,19 @@ function modelSubmit() {
     2. Change jQuery tag editor to something better
     */
 
-    sendPayload(payload);
+    sendPayload(payload, "/createForecaster");
+    alert("Forecaster creation job has been sent, check your telegram " +
+          "bot for updates. Once model creation in done, it will " +
+          "automatically show up in myForecasters.")
 }
 
-function sendPayload(payload) {
+function sendPayload(payload, url) {
     $.ajax({
         type: "POST",
         contentType: "application/json",
         data: JSON.stringify(payload),
         dataType: "json",
-        url: "/createForecaster",
+        url: url,
         success: function (e) {
             handleSuccess(e);
         },

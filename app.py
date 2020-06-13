@@ -4,6 +4,9 @@ from flask import request
 import json
 
 from Utils import UIInitializer as uint
+from Utils import RequestHandler as urh
+import Core.TelegramBot.Bot as tbot
+from threading import Thread
 
 
 app = Flask(__name__, template_folder="UI/templates",
@@ -14,6 +17,8 @@ websiteName = "StockMate"
 
 def init():
     uint.init()
+    tbot.init()
+    tbot.startListening()
 
 
 @app.route("/")
@@ -33,11 +38,9 @@ def myForecasters():
 def createForecastersPage():
     pageName = "Create Forecasters"
     title = "{}-{}".format(websiteName, pageName)
-    print()
     return render_template("createForecasters.html", title=title,
                            pageName=pageName,
                            allModels=uint.allForecasters,
-                           allParams=uint.getUniqueForecasterParams(),
                            indices=uint.getAllIndicesAndConstituents(),
                            allFeatures=uint.getAllFeatures())
 
@@ -45,10 +48,9 @@ def createForecastersPage():
 @app.route("/createForecaster", methods=["POST"])
 def createForecaster():
     modelData = request.json
-    # TODO
-    # Write method to create the model as specified
-    print(modelData)
-    return json.dumps({'success': True}), 200, {'ContentType': 'application/json'}
+    Thread(urh.createForecaster(modelData)).start()
+    return (json.dumps({'success': True}), 200,
+            {'ContentType': 'application/json'})
 
 
 @app.route("/myAgents")
@@ -70,8 +72,10 @@ def createAgents():
 def subscriptions():
     pageName = "Create Forecasters"
     title = "{}-{}".format(websiteName, pageName)
+
     return render_template("subscriptions.html", title=title,
-                           pageName=pageName)
+                           pageName=pageName,
+                           apiKey=uint.getTelegramAPIKey())
 
 
 @app.route("/botFatherInstructions")
@@ -82,6 +86,21 @@ def botCreation():
                            pageName=pageName)
 
 
+@app.route("/submitTelegramAPIKey", methods=["POST"])
+def submitTelegramAPIKey():
+    apiKey = request.json["apiKey"]
+    urh.saveTelegramAPIKey(apiKey)
+    return (json.dumps({'success': True}), 200,
+            {'ContentType': 'application/json'})
+
+
+@app.route("/resetTelegramRoot", methods=["POST"])
+def resetRoot():
+    urh.resetTelegramRoot()
+    return (json.dumps({'success': True}), 200,
+            {'ContentType': 'application/json'})
+
+
 @app.errorhandler(404)
 def pageNotFound(e):
     title = "404: Page Not Found"
@@ -90,4 +109,4 @@ def pageNotFound(e):
 
 if __name__ == '__main__':
     init()
-    app.run(debug=True)
+    app.run(debug=False)

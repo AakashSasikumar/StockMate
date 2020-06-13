@@ -86,7 +86,6 @@ class NSEIndices():
         rows = browser.find_elements_by_tag_name("tr")
         skipCategory = False
         for row in rows:
-            # print(row.get_attribute("innerHTML"))
             if "Indices" in row.text:
                 indexCategory = row.text.strip()[:-2]
                 if indexCategory in categorySkipList:

@@ -53,7 +53,7 @@
               <!-- Basic Card Example -->
               <div class="card shadow mb-4">
                 <div class="card-header py-3">
-                  <h6 class="m-0 font-weight-bold text-primary">1. Define The Model</h6>
+                  <h6 class="m-0 font-weight-bold text-primary">1. Choose A Model</h6>
                 </div>
                 <div class="card-body">
                   <label for="forecasterSelection" style="display: inline-block;width: 120px;">Choose a model</label>
@@ -69,15 +69,8 @@
                   {% endfor %}
                   <script>
                     var allForecasters = {{allModels|tojson}};
-                    var allForecasterParams = {{allParams|tojson}}
                     var indices = {{indices|tojson}}
                   </script>
-                  {% for param in allParams:  %}
-                    <div class="block" id="{{'{}ForecasterParamDiv'.format(param)}}" style="display: none;">
-                      <label for="{{'{}ForecasterParam'.format(param)}}" style="display: inline-block;width: 120px;">{{param.capitalize()}}</label>
-                      <input id="{{'{}ForecasterParam'.format(param)}}" type="number" class="form-control2 bg-light border-0 small" aria-describedby="basic-addon2">
-                    </div>
-                  {%  endfor %}
                 </div>
               </div>
 
@@ -112,7 +105,7 @@
                       Clear All
                     </button>
                   </div>
-
+                  
                 </div>
               </div>
               
@@ -121,6 +114,14 @@
                   <h6 class="m-0 font-weight-bold text-primary">3. Choose The Features</h6>
                 </div>
                 <div class="card-body">
+                  <div class="block">
+                    <label for="lookBack" style="display: inline-block;width: 120px;">lookBack</label>
+                    <input id="lookBack" type="number" class="form-control2 bg-light border-0 small" aria-describedby="basic-addon2">
+                  </div>
+                  <div class="block">
+                    <label for="forecast" style="display: inline-block;width: 120px;">forecast</label>
+                    <input id="forecast" type="number" class="form-control2 bg-light border-0 small" aria-describedby="basic-addon2">
+                  </div>
                   <label for="featureSelection">Feature Selection</label>
                   <select id="featureSelection" class="form-control2 bg-light border-0 small" onchange="featureSelected(this)">
                     {% for featureName in allFeatures %}
@@ -129,6 +130,14 @@
                   </select>
                   <div id="featureSelector" style="display: none;">
                     <input id="selectedFeatures"></input>
+                  </div>
+                  <div id="targetFeatureDiv" style="display: none;">
+                    <label for="targetFeature">Target Feature</label>
+                    <select id="targetFeature" class="form-control2 bg-light border-0 small">
+                      {% for featureName in allFeatures %}
+                      <option value="{{featureName}}">{{featureName}}</option>
+                      {% endfor %}
+                    </select>
                   </div>
                   <div id="featureButtons" style="display: none;">
                     <button id="featureClear" class="btn btn-primary" type="button" onclick="clearSelectedTickers(this)">

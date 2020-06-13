@@ -27,6 +27,7 @@ A python based tool to build agents and models for stock price forecasting and t
 4. tensorflow 2.0 or greater
     - As of June 5th 2020, tensorflow 2.0 has an error when loading a saved model containing LSTM layers. So the workaround for this is to install tf-nightly as they have patched this in this version.
 5. lxml
+6. python-telegram-bot
 
 ## What is StockMate
 

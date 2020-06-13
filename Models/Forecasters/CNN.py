@@ -50,7 +50,7 @@ class BasicCNN(RegressorBase):
         else:
             optimizer = keras.optimizers.Adam()
         model.compile(loss="mse", optimizer=optimizer,
-                      metrics=["mse"])
+                      metrics=["mse", "mae"])
 
         self.model = model
 
@@ -108,6 +108,6 @@ class WaveNet(RegressorBase):
             optimizer = keras.optimizers.Adam()
         model.compile(loss=keras.losses.Huber(),
                       optimizer=optimizer,
-                      metrics=["mae"])
+                      metrics=["mae", "mse"])
 
         self.model = model
