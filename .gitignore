@@ -14,3 +14,5 @@ APIKeyUsageData.json
 Models/ModelInfo.json
 *[Tt]est*
 stockmate
+StockDataRetreiver.py
+telegramAPIData.json
