@@ -214,7 +214,6 @@ class RegressorBase():
         prediction: numpy.ndarray
             The model's prediction
         """
-        context["isTrain"] = False
         procInput = self.dataProcessor.inputProcessor(data, context)
         prediction = self.model.predict(procInput)
         return self.dataProcessor.outputProcessor(prediction, context)

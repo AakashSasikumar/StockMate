@@ -33,43 +33,32 @@
 
           <!-- Page Heading -->
           <div class="d-sm-flex align-items-center justify-content-between mb-4">
-            <h1 class="h3 mb-0 text-gray-800">{{pageName}}</h1>
+            <h1 class="h3 mb-0 text-gray-800">{{modelName}}</h1>
           </div>
           <div class="row">
 
             <div class="col">
-
-              <!-- Default Card Example -->
-              <div class="card mb-4">
-                <div class="card-header">
-                  Forecasters
-                </div>
-                <div class="card-body">
-                  Forecasters can predict future stock prices. The options below should help you build a custom forecaster. Keep in mind that none of these model
-                  predictions are 100% accurate, so please use at your own risk.
-                </div>
-              </div>
-
               <!-- Basic Card Example -->
               <div class="card shadow mb-4">
                 <div class="card-header py-3">
-                  <h6 class="m-0 font-weight-bold text-primary">My Forecasters</h6>
+                  <h6 class="m-0 font-weight-bold text-primary">View Model</h6>
                 </div>
                 <div class="card-body">
-                  <form action="viewForecaster" method="GET">
-                    <label for="savedModelSelection">Saved Model</label>
-                    <select name="selectedModel" id="savedModelSelection" class="form-control2 bg-light border-0 small" required>
-                      {% for model in savedModels.keys() %}
-                      <option value="{{'{}/{}/{}'.format(savedModels[model]['savePath'], savedModels[model]['baseClass'], model)}}">{{'{}.{}'.format(savedModels[model]['baseClass'], model)}}</option>
-                      {% endfor %}
+                    <script>
+                        var modelLoc = "{{modelLoc}}";
+                    </script>
+                    <label for="ticker">Ticker</label>
+                    <select name="ticker" id="savedModelSelection" class="form-control2 bg-light border-0 small" onchange="getPlotForTicker(this, modelLoc)">
+                        {% for ticker in tickers %}
+                        <option value="{{ticker}}">{{ticker}}</option>
+                        {% endfor %}
                     </select>
-                    <div id="savedModelButtons">
-                      <input id="viewSavedModel" class="btn btn-primary" value="View Prediction" type="submit">
+                    <div id="plot">
+                        <!-- The plot is set by a a JS method in main.js -->
                     </div>
-                  </form>
                 </div>
-              </div>
 
+              </div>
             </div>
 
           </div>
