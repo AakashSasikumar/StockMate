@@ -1,5 +1,6 @@
 from Core.DataProcessor import DataProcessor
 import numpy as np
+import math
 
 
 class UniVarProcessor(DataProcessor):
@@ -178,6 +179,7 @@ class MultiVarProcessor(DataProcessor):
 
         allX = None
         allY = None
+        splitRatio = 0.8
         for i, ticker in enumerate(self.tickers):
             context["ticker"] = ticker
             X, Y = self.inputProcessor(self.tickerData, context)
@@ -188,11 +190,11 @@ class MultiVarProcessor(DataProcessor):
                 allX = np.concatenate((allX, X), axis=0)
                 allY = np.concatenate((allY, Y), axis=0)
         if self.isSeq2Seq:
-            # return (allX.reshape(-1, self.lookBack, len(self.features)),
-            #         allY.reshape(-1, self.lookBack, len(self.features)))
-            return allX, allY
+            splitIndex = math.floor(splitRatio * len(allX))
+            return allX[:splitIndex], allY[:splitIndex], allX[splitIndex:], allY[splitIndex:]
         else:
-            return allX, allY
+            splitIndex = math.floor(splitRatio * len(allX))
+            return allX[:splitIndex], allY[:splitIndex], allX[splitIndex:], allY[splitIndex:]
 
     def convertToWindows(self, data, isTrain, shuffle=False):
         """Converts the input data to a windowed dataset

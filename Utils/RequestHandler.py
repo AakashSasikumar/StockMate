@@ -165,7 +165,7 @@ def trainAndSaveForecaster(model, modelName):
         The values of the specified metrics after training.
         Metrics may include MSE, Loss etc,...
     """
-    model.train(validationSplit=0.8, epochs=2, batchSize=32)
+    model.train(validationSplit=0.8, epochs=5000, batchSize=32)
     model.saveModel(modelName)
     return model.history
 

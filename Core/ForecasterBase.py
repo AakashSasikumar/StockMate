@@ -184,11 +184,16 @@ class RegressorBase():
             callback = keras.callbacks.EarlyStopping(patience=patience)
             callbacks.append(callback)
 
-        X, Y = self.dataProcessor.getTrainingData()
+        # X, Y = self.dataProcessor.getTrainingData()
+
+        # history = self.model.fit(x=X, y=Y, epochs=epochs,
+        #                          callbacks=callbacks, batch_size=32,
+        #                          validation_split=validationSplit)
+        X, Y, valX, valY = self.dataProcessor.getTrainingData()
 
         history = self.model.fit(x=X, y=Y, epochs=epochs,
                                  callbacks=callbacks, batch_size=32,
-                                 validation_split=validationSplit)
+                                 validation_data=(valX, valY))
         self.history = history.history
 
     def makePredictions(self, data, context):

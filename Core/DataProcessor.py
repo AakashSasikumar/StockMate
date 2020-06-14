@@ -1,5 +1,4 @@
 import pandas as pd
-import numpy as np
 
 
 class DataProcessor():
@@ -28,7 +27,7 @@ class DataProcessor():
 
     def initFeatures(self):
         # TODO: Increase number of features
-        self.allFeatures = ["open", "high", "low", "close", "volume"]
+        self.allFeatures = ["Open", "High", "Low", "Close", "Volume"]
 
     def loadTickerData(self):
         """Method to load the ticker data
@@ -39,7 +38,8 @@ class DataProcessor():
         self.tickerData = {}
         for ticker in self.tickers:
             data = pd.read_csv("DataStore/StockData/{}.csv".format(ticker),
-                               index_col="timestamp")
+                               index_col="Date")
+
             data = data.sort_index()
             data = self.getFeatures(data)
             self.tickerData[ticker] = data
@@ -66,20 +66,19 @@ class DataProcessor():
             The dataframe containing all the specified features
         """
         newDF = pd.DataFrame(index=data.index)
-        self.allFeatures = ["open", "high", "low", "close", "volume"]
         for feature in self.features:
             if feature not in self.allFeatures:
-                raise Exception("{} feature is not available")
-            if feature == "open":
-                newDF["open"] = data['open']
-            if feature == "high":
-                newDF["high"] = data["high"]
-            if feature == "low":
-                newDF["low"] = data["low"]
-            if feature == "close":
-                newDF["close"] = data["close"]
-            if feature == "volume":
-                newDF["volume"] = data["volume"]
+                raise Exception("{} feature is not available".format(feature))
+            if feature == "Open":
+                newDF["Open"] = data["Open"]
+            if feature == "High":
+                newDF["High"] = data["High"]
+            if feature == "Low":
+                newDF["Low"] = data["Low"]
+            if feature == "Close":
+                newDF["Close"] = data["Close"]
+            if feature == "Volume":
+                newDF["Volume"] = data["Volume"]
             # TODO: Implement ways to get other features using ta-lib
 
         return newDF
