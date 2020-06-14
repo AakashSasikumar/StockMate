@@ -35,7 +35,7 @@ class UniVarProcessor(DataProcessor):
 
     def inputProcessor(self, data, context):
         ticker = context["ticker"]
-        close = data[ticker]["close"]
+        close = data["Close"]
         if context["isTrain"]:
             X, Y = self.convertToWindows(close, True)
             return np.array(X), np.array(Y)
@@ -54,7 +54,7 @@ class UniVarProcessor(DataProcessor):
         allY = None
         for i, ticker in enumerate(self.tickers):
             context["ticker"] = ticker
-            X, Y = self.inputProcessor(self.tickerData, context)
+            X, Y = self.inputProcessor(self.tickerData[ticker], context)
             if i == 0:
                 allX = X
                 allY = Y
@@ -161,7 +161,7 @@ class MultiVarProcessor(DataProcessor):
 
     def inputProcessor(self, data, context):
         ticker = context["ticker"]
-        tickerData = data[ticker]
+        tickerData = data
         if context["isTrain"]:
             X, Y = self.convertToWindows(tickerData, True)
             return np.array(X), np.array(Y)
@@ -180,7 +180,7 @@ class MultiVarProcessor(DataProcessor):
         allY = None
         for i, ticker in enumerate(self.tickers):
             context["ticker"] = ticker
-            X, Y = self.inputProcessor(self.tickerData, context)
+            X, Y = self.inputProcessor(self.tickerData[ticker], context)
             if i == 0:
                 allX = X
                 allY = Y

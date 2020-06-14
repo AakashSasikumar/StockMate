@@ -127,6 +127,17 @@ def getAllIndicesAndConstituents():
     return ind.getIndices()["type"]
 
 
+def getAllSavedForecasters(savePath="DataStore/SavedModels/Forecasters"):
+    savedModels = {}
+    for folder in os.listdir(savePath):
+        template = "{}/{}"
+        for model in os.listdir(template.format(savePath, folder)):
+            savedModels[model] = {}
+            savedModels[model]["baseClass"] = folder
+            savedModels[model]["savePath"] = savePath
+    return savedModels
+
+
 def getAllFeatures():
     # currently only these are supported
     features = ["open", "high", "low", "close", "volume"]

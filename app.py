@@ -17,8 +17,8 @@ websiteName = "StockMate"
 
 def init():
     uint.init()
-    tbot.init()
-    tbot.startListening()
+    # tbot.init()
+    # tbot.startListening()
 
 
 @app.route("/")
@@ -31,7 +31,27 @@ def myForecasters():
     pageName = "My Forecasters"
     title = "{}-{}".format(websiteName, pageName)
     return render_template("myForecasters.html", title=title,
-                           pageName=pageName)
+                           pageName=pageName,
+                           savedModels=uint.getAllSavedForecasters())
+
+
+@app.route("/viewForecaster", methods=["GET"])
+def viewForecasters():
+    modelLoc = request.args["selectedModel"]
+    tickers = urh.getTickers(modelLoc)
+    title = "{}-{}".format(websiteName, modelLoc.split("/")[-1])
+    return render_template("viewForecaster.html", title=title,
+                           modelName=modelLoc.split("/")[-1],
+                           modelLoc=modelLoc,
+                           tickers=tickers)
+
+
+@app.route("/getPlot", methods=["POST"])
+def getPlot():
+    ticker = request.json["ticker"]
+    modelLoc = request.json["modelLoc"]
+    rawPlot, layout = urh.getTickerPlot(modelLoc, ticker, uint.allForecasters)
+    return json.dumps({"data": rawPlot, "layout": layout})
 
 
 @app.route("/createForecastersPage")
@@ -110,3 +130,5 @@ def pageNotFound(e):
 if __name__ == '__main__':
     init()
     app.run(debug=False)
+else:
+    init()

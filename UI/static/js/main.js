@@ -175,18 +175,31 @@ function modelSubmit() {
           "automatically show up in myForecasters.")
 }
 
-function sendPayload(payload, url) {
+function getPlotForTicker(element, modelLoc) {
+    ticker = element.value;
+    var payload = new Object();
+    payload["modelLoc"] = modelLoc;
+    payload["ticker"] = ticker;
+    sendPayload(payload, "/getPlot", type="POST", success=embedPlot);
+}
+
+function embedPlot(e) {
+    console.log(e);
+    Plotly.newPlot("plot", JSON.parse(e["plot"]), JSON.parse(e["layout"]));
+}
+
+function sendPayload(payload, url, type="POST", success=handleSuccess, error=handleFailure) {
     $.ajax({
-        type: "POST",
+        type: type,
         contentType: "application/json",
         data: JSON.stringify(payload),
         dataType: "json",
         url: url,
         success: function (e) {
-            handleSuccess(e);
+            success(e);
         },
         error: function (e) {
-            handleFailure(e);
+            error(e);
         }
     });
 }

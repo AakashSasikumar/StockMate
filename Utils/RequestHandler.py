@@ -5,6 +5,8 @@ import inspect
 import sys
 import Examples.Processors.BasicProcessors as bp
 import traceback
+import dill
+from Utils import Plotter as plot
 
 
 def saveTelegramAPIKey(apiKey):
@@ -221,3 +223,42 @@ def retrainForecaster():
                                      lastTrainedModelData["modelName"])
 
     afterTrainProcedure(history, lastTrainedModelData)
+
+
+def getTickers(modelLoc):
+    """Method to retrieve all the tickers for a model
+
+    This method will read in the dataprocessor for the model and read the
+    tickers specified during its initialization.
+
+    Parameters
+    ----------
+    modelLoc:
+        The location at which this model is present
+
+    Returns
+    -------
+    tickers: list
+        A list of all the tickers used to train this model
+    """
+
+    with open(modelLoc+"/dataProcessor.dill", "rb") as f:
+        dataProc = dill.load(f)
+    return dataProc.tickers
+
+
+def getTickerPlot(modelLoc, ticker, forecasters):
+    modelName = modelLoc.split("/")[-2]
+    modelSaveName = modelLoc.split("/")[-1]
+    modelLoc = forecasters[modelName]["moduleLoc"]
+
+    model = getForecasterClass(modelLoc, modelName)
+    model = model()
+    model.loadModel(modelSaveName)
+
+    allData = model.dataProcessor.tickerData[ticker]
+    context = {"isTrain": False,
+               "ticker": ticker}
+
+    prediction = model.makePredictions(allData, context)
+    return plot.plotModelPrediction(allData, prediction)
