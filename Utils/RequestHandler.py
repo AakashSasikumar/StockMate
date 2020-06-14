@@ -257,8 +257,11 @@ def getTickerPlot(modelLoc, ticker, forecasters):
     model.loadModel(modelSaveName)
 
     allData = model.dataProcessor.tickerData[ticker]
+    targetFeature = model.dataProcessor.allFeatures[model.dataProcessor.yInd]
     context = {"isTrain": False,
                "ticker": ticker}
 
     prediction = model.makePredictions(allData, context)
-    return plot.plotModelPrediction(allData, prediction)
+    figure = plot.plotModelPrediction(ticker, allData, prediction,
+                                      targetFeature)
+    return figure

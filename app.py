@@ -50,8 +50,8 @@ def viewForecasters():
 def getPlot():
     ticker = request.json["ticker"]
     modelLoc = request.json["modelLoc"]
-    rawPlot, layout = urh.getTickerPlot(modelLoc, ticker, uint.allForecasters)
-    return json.dumps({"data": rawPlot, "layout": layout})
+    figure = urh.getTickerPlot(modelLoc, ticker, uint.allForecasters)
+    return figure
 
 
 @app.route("/createForecastersPage")

@@ -184,8 +184,7 @@ function getPlotForTicker(element, modelLoc) {
 }
 
 function embedPlot(e) {
-    console.log(e);
-    Plotly.newPlot("plot", JSON.parse(e["plot"]), JSON.parse(e["layout"]));
+    Plotly.react("plot", e.data, e.layout);
 }
 
 function sendPayload(payload, url, type="POST", success=handleSuccess, error=handleFailure) {
