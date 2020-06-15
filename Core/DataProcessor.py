@@ -27,7 +27,7 @@ class DataProcessor():
 
     def initFeatures(self):
         # TODO: Increase number of features
-        self.allFeatures = ["Open", "High", "Low", "Close", "Volume"]
+        self.allFeatures = ["open", "high", "low", "close", "volume"]
 
     def loadTickerData(self):
         """Method to load the ticker data
@@ -67,17 +67,17 @@ class DataProcessor():
         """
         newDF = pd.DataFrame(index=data.index)
         for feature in self.features:
-            if feature not in self.allFeatures:
+            if feature.lower() not in self.allFeatures:
                 raise Exception("{} feature is not available".format(feature))
-            if feature == "Open":
+            if feature.lower() == "Open".lower():
                 newDF["Open"] = data["Open"]
-            if feature == "High":
+            if feature.lower() == "High".lower():
                 newDF["High"] = data["High"]
-            if feature == "Low":
+            if feature.lower() == "Low".lower():
                 newDF["Low"] = data["Low"]
-            if feature == "Close":
+            if feature.lower() == "Close".lower():
                 newDF["Close"] = data["Close"]
-            if feature == "Volume":
+            if feature.lower() == "Volume".lower():
                 newDF["Volume"] = data["Volume"]
             # TODO: Implement ways to get other features using ta-lib
 

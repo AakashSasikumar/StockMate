@@ -175,11 +175,13 @@ function modelSubmit() {
           "automatically show up in myForecasters.")
 }
 
-function getPlotForTicker(element, modelLoc) {
-    ticker = element.value;
+function getPlotForTicker(modelLoc) {
+    var ticker = document.getElementById("savedModelSelection").value;
+    var plotType = document.getElementById("plotType").value;
     var payload = new Object();
     payload["modelLoc"] = modelLoc;
     payload["ticker"] = ticker;
+    payload["plotType"] = plotType;
     sendPayload(payload, "/getPlot", type="POST", success=embedPlot);
 }
 

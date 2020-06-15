@@ -17,13 +17,14 @@ websiteName = "StockMate"
 
 def init():
     uint.init()
-    # tbot.init()
-    # tbot.startListening()
+    tbot.init()
+    tbot.startListening()
 
 
 @app.route("/")
 def index():
-    return render_template("index.html", title=websiteName)
+    return render_template("index.html", title=websiteName,
+                           numForecasters=len(uint.getAllSavedForecasters()))
 
 
 @app.route("/myForecasters")
@@ -50,7 +51,8 @@ def viewForecasters():
 def getPlot():
     ticker = request.json["ticker"]
     modelLoc = request.json["modelLoc"]
-    figure = urh.getTickerPlot(modelLoc, ticker, uint.allForecasters)
+    plotType = request.json["plotType"]
+    figure = urh.getTickerPlot(modelLoc, ticker, plotType)
     return figure
 
 

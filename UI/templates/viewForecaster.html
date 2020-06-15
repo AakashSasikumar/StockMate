@@ -47,8 +47,12 @@
                     <script>
                         var modelLoc = "{{modelLoc}}";
                     </script>
+                    <label for="plotType">Plot Type</label>
+                    <select name="plotType" id="plotType" class="form-control2 bg-light border-0 small" onchange="getPlotForTicker(modelLoc)">
+                      <option value="lineChart">Line Chart</option>
+                    </select>
                     <label for="ticker">Ticker</label>
-                    <select name="ticker" id="savedModelSelection" class="form-control2 bg-light border-0 small" onchange="getPlotForTicker(this, modelLoc)">
+                    <select name="ticker" id="savedModelSelection" class="form-control2 bg-light border-0 small" onchange="getPlotForTicker(modelLoc)">
                         {% for ticker in tickers %}
                         <option value="{{ticker}}">{{ticker}}</option>
                         {% endfor %}

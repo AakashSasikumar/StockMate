@@ -156,8 +156,8 @@ class RegressorBase():
         self.lookBack = self.dataProcessor.lookBack
         self.forecast = self.dataProcessor.forecast
 
-    def train(self, validationSplit=0.7, epochs=1000, earlyStopping=True,
-              patience=15, callbacks=[], batchSize=32):
+    def train(self, epochs=1000, earlyStopping=True,
+              patience=15, callbacks=[]):
         """The method to start training the model
 
         Parameters
@@ -184,16 +184,16 @@ class RegressorBase():
             callback = keras.callbacks.EarlyStopping(patience=patience)
             callbacks.append(callback)
 
-        # X, Y = self.dataProcessor.getTrainingData()
+        trainDS, validDS = self.dataProcessor.getTrainingData()
+
+        history = self.model.fit(trainDS, epochs=epochs,
+                                 callbacks=callbacks,
+                                 validation_data=validDS)
+        # X, Y, valX, valY = self.dataProcessor.getTrainingData()
 
         # history = self.model.fit(x=X, y=Y, epochs=epochs,
         #                          callbacks=callbacks, batch_size=32,
-        #                          validation_split=validationSplit)
-        X, Y, valX, valY = self.dataProcessor.getTrainingData()
-
-        history = self.model.fit(x=X, y=Y, epochs=epochs,
-                                 callbacks=callbacks, batch_size=32,
-                                 validation_data=(valX, valY))
+        #                          validation_data=(valX, valY))
         self.history = history.history
 
     def makePredictions(self, data, context):

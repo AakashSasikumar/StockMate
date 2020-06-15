@@ -7,6 +7,8 @@ import Examples.Processors.BasicProcessors as bp
 import traceback
 import dill
 from Utils import Plotter as plot
+from Utils import UIInitializer as uint
+import pandas as pd
 
 
 def saveTelegramAPIKey(apiKey):
@@ -247,21 +249,28 @@ def getTickers(modelLoc):
     return dataProc.tickers
 
 
-def getTickerPlot(modelLoc, ticker, forecasters):
+def getTickerPlot(modelLoc, ticker, plotType):
     modelName = modelLoc.split("/")[-2]
     modelSaveName = modelLoc.split("/")[-1]
-    modelLoc = forecasters[modelName]["moduleLoc"]
+    modelLoc = uint.allForecasters[modelName]["moduleLoc"]
 
     model = getForecasterClass(modelLoc, modelName)
     model = model()
     model.loadModel(modelSaveName)
 
-    allData = model.dataProcessor.tickerData[ticker]
+    allData = getTickerData(ticker)
     targetFeature = model.dataProcessor.allFeatures[model.dataProcessor.yInd]
     context = {"isTrain": False,
                "ticker": ticker}
 
     prediction = model.makePredictions(allData, context)
-    figure = plot.plotModelPrediction(ticker, allData, prediction,
-                                      targetFeature)
+    figure = plot.getModelPredictionFigure(ticker, allData, prediction,
+                                           targetFeature.capitalize(),
+                                           plotType)
     return figure
+
+
+def getTickerData(ticker):
+    df = pd.read_csv("DataStore/StockData/{}.csv".format(ticker),
+                     index_col="Date")
+    return df
