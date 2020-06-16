@@ -276,7 +276,11 @@ class testProcessor(DataProcessor):
         # print(modelOut)
         data = self.tickerData[context['ticker']][self.targetFeature]
         factor = max(data) - min(data)
-        return (modelOut * factor) + min(data)
+        out = (modelOut * factor) + min(data)
+        nOut = np.zeros(shape=(len(out), self.forecast))
+        for i, row in enumerate(out):
+            nOut[i] = row[-self.forecast:].reshape(-self.forecast,)
+        return nOut
 
     def getTrainingData(self, shuffle=True):
         context = {}

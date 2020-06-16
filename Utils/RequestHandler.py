@@ -249,21 +249,56 @@ def getTickers(modelLoc):
     return dataProc.tickers
 
 
-def getTickerPlot(modelLoc, ticker, plotType):
+def getTickerPlot(modelLoc, ticker, plotType, numDays):
+    """Method to get the plotly plots for the ticker
+
+    This method plots the entire raw data for the ticker as well
+    as the predictions.
+
+    Parameters
+    ----------
+    modelLoc: str
+        The save location of the model specified
+    ticker: str
+        The ticker symbol which is to be plotted. This is used as the title
+        of the plot
+    plotType: str
+        The type of plot that is to be plotted
+    numDays: str
+        The number of days used for the model prediction
+
+    Returns
+    -------
+    figure: str
+        The plotly figure encoded into a JSON format
+    """
     modelName = modelLoc.split("/")[-2]
     modelSaveName = modelLoc.split("/")[-1]
     modelLoc = uint.allForecasters[modelName]["moduleLoc"]
+
+    numDays = int(numDays)
 
     model = getForecasterClass(modelLoc, modelName)
     model = model()
     model.loadModel(modelSaveName)
 
     allData = getTickerData(ticker)
+    allData = model.dataProcessor.getFeatures(allData)
     targetFeature = model.dataProcessor.allFeatures[model.dataProcessor.yInd]
     context = {"isTrain": False,
                "ticker": ticker}
 
-    prediction = model.makePredictions(allData, context)
+    if numDays < model.dataProcessor.lookBack and numDays != -1:
+        message = ("Cannot predict for numDays={} when model's"
+                   " lookBack={}")
+        return {"error": message.format(numDays,
+                                        model.dataProcessor.lookBack)}
+    if numDays == -1 or numDays >= len(allData):
+        reqData = allData
+    else:
+        numDays = int(numDays)
+        reqData = allData[-numDays:]
+    prediction = model.makePredictions(reqData, context)
     figure = plot.getModelPredictionFigure(ticker, allData, prediction,
                                            targetFeature.capitalize(),
                                            plotType)
@@ -271,6 +306,18 @@ def getTickerPlot(modelLoc, ticker, plotType):
 
 
 def getTickerData(ticker):
+    """Method to retrieve the latest raw ticker
+
+    Parameters
+    ----------
+    ticker: str
+        The ticker for which the raw data is to be retrieved
+
+    Returns
+    -------
+    df: pandas.DataFrame
+        The raw data of the ticker
+    """
     df = pd.read_csv("DataStore/StockData/{}.csv".format(ticker),
-                     index_col="Date")
+                     index_col="Date", parse_dates=["Date"])
     return df

@@ -38,7 +38,7 @@ class DataProcessor():
         self.tickerData = {}
         for ticker in self.tickers:
             data = pd.read_csv("DataStore/StockData/{}.csv".format(ticker),
-                               index_col="Date")
+                               index_col="Date", parse_dates=["Date"])
 
             data = data.sort_index()
             data = self.getFeatures(data)

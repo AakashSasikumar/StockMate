@@ -5,16 +5,16 @@ from Core.TelegramBot.CustomFilters import RetrainReplyFilter
 from Utils import RequestHandler as rh
 from threading import Thread
 
-with open("telegramAPIData.json") as f:
-    apiData = json.load(f)
-
 
 def init():
     """Method to initialize bot
 
     Assigns all handlers, and filters. It also loads the root information
     """
-    global root, updater
+    global root, updater, apiData
+
+    with open("telegramAPIData.json") as f:
+        apiData = json.load(f)
 
     updater = Updater(apiData["apiKey"], use_context=True)
 

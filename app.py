@@ -7,6 +7,7 @@ from Utils import UIInitializer as uint
 from Utils import RequestHandler as urh
 import Core.TelegramBot.Bot as tbot
 from threading import Thread
+import os
 
 
 app = Flask(__name__, template_folder="UI/templates",
@@ -17,8 +18,9 @@ websiteName = "StockMate"
 
 def init():
     uint.init()
-    tbot.init()
-    tbot.startListening()
+    if "telegramAPIData.json" in os.listdir():
+        tbot.init()
+        tbot.startListening()
 
 
 @app.route("/")
@@ -52,7 +54,9 @@ def getPlot():
     ticker = request.json["ticker"]
     modelLoc = request.json["modelLoc"]
     plotType = request.json["plotType"]
-    figure = urh.getTickerPlot(modelLoc, ticker, plotType)
+    numDays = request.json["numDays"]
+    figure = urh.getTickerPlot(modelLoc, ticker,
+                               plotType, numDays)
     return figure
 
 
@@ -131,6 +135,6 @@ def pageNotFound(e):
 
 if __name__ == '__main__':
     init()
-    app.run(debug=False)
+    app.run(debug=True)
 else:
     init()

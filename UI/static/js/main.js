@@ -178,15 +178,22 @@ function modelSubmit() {
 function getPlotForTicker(modelLoc) {
     var ticker = document.getElementById("savedModelSelection").value;
     var plotType = document.getElementById("plotType").value;
+    var numDays = document.getElementById("numDays").value;
     var payload = new Object();
     payload["modelLoc"] = modelLoc;
     payload["ticker"] = ticker;
     payload["plotType"] = plotType;
+    payload["numDays"] = numDays;
     sendPayload(payload, "/getPlot", type="POST", success=embedPlot);
 }
 
 function embedPlot(e) {
-    Plotly.react("plot", e.data, e.layout);
+    if (e.hasOwnProperty("error")) {
+        alert(e.error);
+    }
+    else {
+        Plotly.react("plot", e.data, e.layout, {scrollZoom: true, dragmode: "pan"});
+    }
 }
 
 function sendPayload(payload, url, type="POST", success=handleSuccess, error=handleFailure) {

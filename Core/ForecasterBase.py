@@ -94,8 +94,9 @@ class RegressorBase():
 
         with open(savePath + "modelConfig.json", "w+") as f:
             f.write(self.model.to_json())
-        with open(savePath + "history.pickle", "wb+") as f:
-            pickle.dump(self.history, f)
+        if self.history:
+            with open(savePath + "history.pickle", "wb+") as f:
+                pickle.dump(self.history, f)
         self.model.save(savePath + "model", save_format="tf",
                         include_optimizer=True)
         with open(savePath + "dataProcessor.dill", "wb+") as f:
