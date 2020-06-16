@@ -7,6 +7,7 @@ from Utils import UIInitializer as uint
 from Utils import RequestHandler as urh
 import Core.TelegramBot.Bot as tbot
 from threading import Thread
+import os
 
 
 app = Flask(__name__, template_folder="UI/templates",
@@ -17,13 +18,15 @@ websiteName = "StockMate"
 
 def init():
     uint.init()
-    tbot.init()
-    tbot.startListening()
+    if "telegramAPIData.json" in os.listdir():
+        tbot.init()
+        tbot.startListening()
 
 
 @app.route("/")
 def index():
-    return render_template("index.html", title=websiteName)
+    return render_template("index.html", title=websiteName,
+                           numForecasters=len(uint.getAllSavedForecasters()))
 
 
 @app.route("/myForecasters")
@@ -31,7 +34,30 @@ def myForecasters():
     pageName = "My Forecasters"
     title = "{}-{}".format(websiteName, pageName)
     return render_template("myForecasters.html", title=title,
-                           pageName=pageName)
+                           pageName=pageName,
+                           savedModels=uint.getAllSavedForecasters())
+
+
+@app.route("/viewForecaster", methods=["GET"])
+def viewForecasters():
+    modelLoc = request.args["selectedModel"]
+    tickers = urh.getTickers(modelLoc)
+    title = "{}-{}".format(websiteName, modelLoc.split("/")[-1])
+    return render_template("viewForecaster.html", title=title,
+                           modelName=modelLoc.split("/")[-1],
+                           modelLoc=modelLoc,
+                           tickers=tickers)
+
+
+@app.route("/getPlot", methods=["POST"])
+def getPlot():
+    ticker = request.json["ticker"]
+    modelLoc = request.json["modelLoc"]
+    plotType = request.json["plotType"]
+    numDays = request.json["numDays"]
+    figure = urh.getTickerPlot(modelLoc, ticker,
+                               plotType, numDays)
+    return figure
 
 
 @app.route("/createForecastersPage")
@@ -109,4 +135,6 @@ def pageNotFound(e):
 
 if __name__ == '__main__':
     init()
-    app.run(debug=False)
+    app.run(debug=True)
+else:
+    init()

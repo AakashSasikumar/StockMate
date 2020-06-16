@@ -94,8 +94,9 @@ class RegressorBase():
 
         with open(savePath + "modelConfig.json", "w+") as f:
             f.write(self.model.to_json())
-        with open(savePath + "history.pickle", "wb+") as f:
-            pickle.dump(self.history, f)
+        if self.history:
+            with open(savePath + "history.pickle", "wb+") as f:
+                pickle.dump(self.history, f)
         self.model.save(savePath + "model", save_format="tf",
                         include_optimizer=True)
         with open(savePath + "dataProcessor.dill", "wb+") as f:
@@ -156,8 +157,8 @@ class RegressorBase():
         self.lookBack = self.dataProcessor.lookBack
         self.forecast = self.dataProcessor.forecast
 
-    def train(self, validationSplit=0.7, epochs=1000, earlyStopping=True,
-              patience=15, callbacks=[], batchSize=32):
+    def train(self, epochs=1000, earlyStopping=True,
+              patience=15, callbacks=[]):
         """The method to start training the model
 
         Parameters
@@ -184,11 +185,16 @@ class RegressorBase():
             callback = keras.callbacks.EarlyStopping(patience=patience)
             callbacks.append(callback)
 
-        X, Y = self.dataProcessor.getTrainingData()
+        trainDS, validDS = self.dataProcessor.getTrainingData()
 
-        history = self.model.fit(x=X, y=Y, epochs=epochs,
-                                 callbacks=callbacks, batch_size=32,
-                                 validation_split=validationSplit)
+        history = self.model.fit(trainDS, epochs=epochs,
+                                 callbacks=callbacks,
+                                 validation_data=validDS)
+        # X, Y, valX, valY = self.dataProcessor.getTrainingData()
+
+        # history = self.model.fit(x=X, y=Y, epochs=epochs,
+        #                          callbacks=callbacks, batch_size=32,
+        #                          validation_data=(valX, valY))
         self.history = history.history
 
     def makePredictions(self, data, context):
@@ -209,7 +215,6 @@ class RegressorBase():
         prediction: numpy.ndarray
             The model's prediction
         """
-        context["isTrain"] = False
         procInput = self.dataProcessor.inputProcessor(data, context)
         prediction = self.model.predict(procInput)
         return self.dataProcessor.outputProcessor(prediction, context)

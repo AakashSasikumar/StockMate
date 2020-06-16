@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+
+{%include 'head.html'%}
+
+<body id="page-top">
+
+  <!-- Page Wrapper -->
+  <div id="wrapper">
+
+    <!-- Sidebar -->
+    {% include 'sidebar.html' %}
+    <!-- End of Sidebar -->
+
+    <!-- Content Wrapper -->
+    <div id="content-wrapper" class="d-flex flex-column">
+
+      <!-- Main Content -->
+      <div id="content">
+
+        <!-- Topbar -->
+        <nav class="navbar navbar-expand navbar-light bg-white topbar mb-4 static-top shadow">
+
+          <!-- Sidebar Toggle (Topbar) -->
+          <button id="sidebarToggleTop" class="btn btn-link d-md-none rounded-circle mr-3">
+            <i class="fa fa-bars"></i>
+          </button>
+        </nav>
+        <!-- End of Topbar -->
+
+        <!-- Begin Page Content -->
+        <div class="container-fluid">
+
+          <!-- Page Heading -->
+          <div class="d-sm-flex align-items-center justify-content-between mb-4">
+            <h1 class="h3 mb-0 text-gray-800">{{modelName}}</h1>
+          </div>
+          <div class="row">
+
+            <div class="col">
+              <!-- Basic Card Example -->
+              <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                  <h6 class="m-0 font-weight-bold text-primary">View Model</h6>
+                </div>
+                <div class="card-body">
+                    <script>
+                        var modelLoc = "{{modelLoc}}";
+                    </script>
+                    <label for="plotType">Plot Type</label>
+                    <select name="plotType" id="plotType" class="form-control3 bg-light border-0 small">
+                      <option value="lineChart">Line Chart</option>
+                    </select>
+                    <label for="ticker">Ticker</label>
+                    <select name="ticker" id="savedModelSelection" class="form-control3 bg-light border-0 small">
+                        {% for ticker in tickers %}
+                        <option value="{{ticker}}">{{ticker}}</option>
+                        {% endfor %}
+                    </select>
+                    <label for="numDays">Days</label>
+                    <select name="numDays" id="numDays" class="form-control3 bg-light border-0 small">
+                        <option value="5">5</option>
+                        <option value="10">10</option>
+                        <option value="15">15</option>
+                        <option value="30">30</option>
+                        <option value="60">60</option>
+                        <option value="100">100</option>
+                        <option value="200">200</option>
+                        <option value="500">500</option>
+                        <option value="1000">1000</option>
+                        <option value="-1">All (May become laggy)</option>
+                    </select>
+                    <button class="btn btn-primary" type="button" onclick="getPlotForTicker(modelLoc)">
+                      Plot
+                    </button>
+                    <div id="plot">
+                        <!-- The plot is set by a a JS method in main.js -->
+                    </div>
+                </div>
+
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+        <!-- /.container-fluid -->
+
+      </div>
+      <!-- End of Main Content -->
+
+      <!-- Footer -->
+      <footer class="sticky-footer bg-white">
+        <div class="container my-auto">
+          <div class="copyright text-center my-auto">
+            <span>StockMate :)</span>
+          </div>
+        </div>
+      </footer>
+      <!-- End of Footer -->
+
+    </div>
+    <!-- End of Content Wrapper -->
+
+  </div>
+  <!-- End of Page Wrapper -->
+  {% include 'footerImports.html' %}
+</body>
+
+</html>

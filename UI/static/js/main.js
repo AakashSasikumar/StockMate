@@ -175,18 +175,39 @@ function modelSubmit() {
           "automatically show up in myForecasters.")
 }
 
-function sendPayload(payload, url) {
+function getPlotForTicker(modelLoc) {
+    var ticker = document.getElementById("savedModelSelection").value;
+    var plotType = document.getElementById("plotType").value;
+    var numDays = document.getElementById("numDays").value;
+    var payload = new Object();
+    payload["modelLoc"] = modelLoc;
+    payload["ticker"] = ticker;
+    payload["plotType"] = plotType;
+    payload["numDays"] = numDays;
+    sendPayload(payload, "/getPlot", type="POST", success=embedPlot);
+}
+
+function embedPlot(e) {
+    if (e.hasOwnProperty("error")) {
+        alert(e.error);
+    }
+    else {
+        Plotly.react("plot", e.data, e.layout, {scrollZoom: true, dragmode: "pan"});
+    }
+}
+
+function sendPayload(payload, url, type="POST", success=handleSuccess, error=handleFailure) {
     $.ajax({
-        type: "POST",
+        type: type,
         contentType: "application/json",
         data: JSON.stringify(payload),
         dataType: "json",
         url: url,
         success: function (e) {
-            handleSuccess(e);
+            success(e);
         },
         error: function (e) {
-            handleFailure(e);
+            error(e);
         }
     });
 }

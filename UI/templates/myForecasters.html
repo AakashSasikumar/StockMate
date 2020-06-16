@@ -53,11 +53,19 @@
               <!-- Basic Card Example -->
               <div class="card shadow mb-4">
                 <div class="card-header py-3">
-                  <h6 class="m-0 font-weight-bold text-primary">Forecaster Creation</h6>
+                  <h6 class="m-0 font-weight-bold text-primary">My Forecasters</h6>
                 </div>
                 <div class="card-body">
-                  <form action="createForecaster">
-
+                  <form action="viewForecaster" method="GET">
+                    <label for="savedModelSelection">Saved Model</label>
+                    <select name="selectedModel" id="savedModelSelection" class="form-control2 bg-light border-0 small" required>
+                      {% for model in savedModels.keys() %}
+                      <option value="{{'{}/{}/{}'.format(savedModels[model]['savePath'], savedModels[model]['baseClass'], model)}}">{{'{}.{}'.format(savedModels[model]['baseClass'], model)}}</option>
+                      {% endfor %}
+                    </select>
+                    <div id="savedModelButtons">
+                      <input id="viewSavedModel" class="btn btn-primary" value="View Prediction" type="submit">
+                    </div>
                   </form>
                 </div>
               </div>
