@@ -13,7 +13,19 @@ class RegressorBase():
         The keras model
     history: keras.callbacks.callbacks.History
         The train history of the model
+    dataProcessor: Core.DataProcessor
+        The data processor for the model
     """
+    def buildModel(self, learningRate=None):
+        """Builds the model and sets the class attribute
+
+        Parameters
+        ----------
+        learningRate: float, optional
+            The learning rate for the optimizer
+        """
+        raise NotImplementedError("Must override buildModel")
+
     def getProjectRoot(self):
         """Returns the root directory of the folder
 

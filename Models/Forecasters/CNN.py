@@ -12,27 +12,10 @@ class BasicCNN(RegressorBase):
     ----------
     numDims: int
         The dimensionality of the data
-    lookBack: int, optional
-        Variable to specify how many days to consider when making
-        a prediction
-    forecast: int, optional
-        Variable to specify how many days ahead to make predictions for.
-    yInd: int
-        The column index of the target
     model: keras.models
         The keras model
     """
-    def __init__(self):
-        self.dataProcessor = None
-
     def buildModel(self, learningRate=None):
-        """Builds the model and sets the class attribute
-
-        Parameters
-        ----------
-        learningRate: float, optional
-            Optional learning to specify for the AdamOptimizer
-        """
         if self.dataProcessor is None:
             message = ("DataProcessor not specified for this model. Either "
                        "load existing model or define a DataProcessor")
@@ -58,34 +41,17 @@ class BasicCNN(RegressorBase):
 class WaveNet(RegressorBase):
     """A keras implementation of wavenet for stock prediction.
 
-    This model works with multivariate data.
+    The implementation of the revered WaveNet. This model supports
+    multivariate data as well as univariate data.
 
     Attributes
     ----------
     numDims: int
         The dimensionality of the data
-    lookBack: int, optional
-        Variable to specify how many days to consider when making
-        a prediction
-    forecast: int, optional
-        Variable to specify how many days ahead to make predictions for.
-    yInd: int
-        The column index of the target
     model: keras.models
         The keras model
     """
-
-    def __init__(self):
-        self.dataProcessor = None
-
     def buildModel(self, learningRate=None):
-        """Builds the model and sets the class attribute
-
-        Parameters
-        ----------
-        learningRate: float, optional
-            Optional learning to specify for the AdamOptimizer
-        """
         if self.dataProcessor is None:
             message = ("DataProcessor not specified for this model. Either "
                        "load existing model or define a DataProcessor")

@@ -15,28 +15,10 @@ class BasicLSTM(RegressorBase):
     ----------
     numDims: int
         The dimensionality of the input data.
-    lookBack: int, optional
-        Variable to specify how many days to consider when making
-        a prediction
-    forecast: int, optional
-        Variable to specify how many days ahead to make predictions for.
     model: keras.models
         The keras model of the ANN
-    yInd: int
-        The position of the target variable
     """
-    def __init__(self):
-        self.dataProcessor = None
-
     def buildModel(self, learningRate=None):
-        """Builds the model and sets the class attribute
-
-        Parameters
-        ----------
-        learningRate: float, optional
-            Optional learning to specify for the AdamOptimizer
-        """
-
         if self.dataProcessor is None:
             message = ("DataProcessor not specified for this model. Either "
                        "load existing model or define a DataProcessor")
@@ -73,29 +55,10 @@ class DenseLSTM(RegressorBase):
     ----------
     numDims: int
         The dimensionality of the input data.
-    lookBack: int, optional
-        Variable to specify how many days to consider when making
-        a prediction
-    forecast: int, optional
-        Variable to specify how many days ahead to make predictions for.
     model: keras.models
         The keras model of the ANN
-    yInd: int
-        The position of the target variable
     """
-
-    def __init__(self):
-        self.dataProcessor = None
-
     def buildModel(self, learningRate=None):
-        """Builds the model and sets the class attribute
-
-        Parameters
-        ----------
-        learningRate: float, optional
-            Optional learning to specify for the AdamOptimizer
-        """
-
         if self.dataProcessor is None:
             message = ("DataProcessor not specified for this model. Either "
                        "load existing model or define a DataProcessor")
