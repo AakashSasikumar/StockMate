@@ -20,3 +20,6 @@
 
 # Jupyter notebook
 *.ipynb  text
+
+*.html  -linguist-detectable
+*.css   -linguist-detectable
