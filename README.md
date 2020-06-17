@@ -62,7 +62,6 @@ These two functionalities have been abstracted out of the model and incorporated
 
 1. `inputProcessor()`
 2. `outputProcessor()`
-3. `getTrainingData()`
 
 Please check the documentation under `Core.DataProcessor` to see what the parameters that are passed into it and what the expected outputs are.
 
