@@ -134,7 +134,7 @@ class MultiVarProcessor(DataProcessor):
 
         self.lookBack = lookBack
         self.forecast = forecast
-        self.yInd = self.allFeatures.index(targetFeature.lower())
+        self.yInd = self.features.index(targetFeature)
         self.tickers = tickers
         self.features = features
         self.isSeq2Seq = isSeq2Seq
