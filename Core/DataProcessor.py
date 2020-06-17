@@ -1,4 +1,5 @@
 import pandas as pd
+import math
 
 
 class DataProcessor():
@@ -27,7 +28,11 @@ class DataProcessor():
 
     def initFeatures(self):
         # TODO: Increase number of features
-        self.allFeatures = ["open", "high", "low", "close", "volume"]
+        self.OHLCV = ["open", "high", "low", "close", "volume"]
+        self.additionalFeatures = []
+        self.allFeatures = []
+        self.allFeatures.extend(self.OHLCV)
+        self.allFeatures.extend(self.additionalFeatures)
 
     def loadTickerData(self):
         """Method to load the ticker data
@@ -69,19 +74,37 @@ class DataProcessor():
         for feature in self.features:
             if feature.lower() not in self.allFeatures:
                 raise Exception("{} feature is not available".format(feature))
-            if feature.lower() == "Open".lower():
-                newDF["Open"] = data["Open"]
-            if feature.lower() == "High".lower():
-                newDF["High"] = data["High"]
-            if feature.lower() == "Low".lower():
-                newDF["Low"] = data["Low"]
-            if feature.lower() == "Close".lower():
-                newDF["Close"] = data["Close"]
-            if feature.lower() == "Volume".lower():
-                newDF["Volume"] = data["Volume"]
+            if feature.lower() in self.OHLCV:
+                newDF[feature] = data[self.getColumnName(data, feature)]
             # TODO: Implement ways to get other features using ta-lib
 
         return newDF
+
+    def getColumnName(self, data, feature):
+        """Method to get proper column name from dataframe
+
+        This method is to make the feature names capitalization agnostic.
+        If the Open feature were specified as OpEn, this method would match
+        the correct column name from the dataframe and return it. As long as
+        the spelling is the same, capitalization doesn't matter.
+
+        Parameters
+        ----------
+        data: pandas.DataFrame
+            The raw ticker data
+        feature: str
+            The user specified feature
+
+        Returns
+        -------
+        column: str
+            The proper column name of the dataframe
+
+        """
+        for column in data.columns:
+            if column.lower() == feature.lower():
+                return column
+        raise Exception("{} feature is not available".format(feature))
 
     def inputProcessor(self, data, context):
         """Method to process raw ticker data into model-compatible format
@@ -138,18 +161,52 @@ class DataProcessor():
         """
         raise NotImplementedError("Must override outputProcessor")
 
-    def getTrainingData(self):
+    def getTrainingData(self, validationSplit=0.7, shuffle=True,
+                        batchSize=64):
         """Method specifying how to prepare training data
 
-        This method must be overrod by a child class, as this method
-        may differ for differt models
+        Parameters
+        ----------
+        validationSplit: float
+            The float indicating how much of the data should be used for
+            training. The other portion is used for validation.
+        shuffle: boolean
+            A boolean indicating whether the data should be shuffled before
+            training
+        batchSize: int
+            A number indicating the batchsize of the data for training
 
         Returns
         -------
-        allX: np.array
+        trainDS: tf.data.Dataset
             The input for the model
-        allY: np.array
+        validDS: tf.data.Dataset
             The target for the model
         """
 
-        raise NotImplementedError("Must override getTrainingData")
+        context = {}
+        context["isTrain"] = True
+        lenTrain = 0
+        lenValid = 0
+        trainDS = None
+        validDS = None
+        for i, ticker in enumerate(self.tickers):
+            context["ticker"] = ticker
+            data = self.tickerData[ticker].copy()
+            splitIndex = math.floor(validationSplit * len(data))
+            lenTrain += len(data[:splitIndex])
+            lenValid += len(data[splitIndex:])
+            if i == 0:
+                trainDS = self.inputProcessor(data[:splitIndex], context)
+                validDS = self.inputProcessor(data[splitIndex:], context)
+            else:
+                tmpTrain = self.inputProcessor(data[:splitIndex], context)
+                tmpValid = self.inputProcessor(data[splitIndex:], context)
+                trainDS.concatenate(tmpTrain)
+                validDS.concatenate(tmpValid)
+        if shuffle:
+            trainDS.shuffle(lenTrain)
+            validDS.shuffle(lenValid)
+        trainDS = trainDS.batch(batchSize).prefetch(1)
+        validDS = validDS.batch(batchSize).prefetch(1)
+        return trainDS, validDS

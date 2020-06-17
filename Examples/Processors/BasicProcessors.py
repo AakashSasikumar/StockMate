@@ -48,27 +48,6 @@ class UniVarProcessor(DataProcessor):
     def outputProcessor(self, modelOut, context):
         return modelOut
 
-    def getTrainingData(self):
-        context = {}
-        context["isTrain"] = True
-
-        allX = None
-        allY = None
-        for i, ticker in enumerate(self.tickers):
-            context["ticker"] = ticker
-            X, Y = self.inputProcessor(self.tickerData[ticker], context)
-            if i == 0:
-                allX = X
-                allY = Y
-            else:
-                allX = np.concatenate((allX, X), axis=0)
-                allY = np.concatenate((allY, Y), axis=0)
-        if self.isSeq2Seq:
-            return (allX.reshape(-1, self.lookBack, 1),
-                    allY.reshape(-1, self.lookBack, 1))
-        else:
-            return allX, allY
-
     def convertToWindows(self, data, isTrain, shuffle=False):
         """Converts the input data to a windowed dataset
 
@@ -150,8 +129,7 @@ class MultiVarProcessor(DataProcessor):
     """
 
     def __init__(self, tickers, features, lookBack, forecast,
-                 targetFeature, isSeq2Seq=False, shuffle=True,
-                 validationSplit=0.8, batchSize=32):
+                 targetFeature, isSeq2Seq=False):
         super().__init__(tickers, features)
 
         self.lookBack = lookBack
@@ -162,9 +140,6 @@ class MultiVarProcessor(DataProcessor):
         self.isSeq2Seq = isSeq2Seq
 
         self.tickerData = self.getTickerData()
-        self.shuffle = shuffle
-        self.batchSize = batchSize
-        self.validationSplit = validationSplit
 
     def inputProcessor(self, data, context):
         tickerData = data
@@ -177,34 +152,6 @@ class MultiVarProcessor(DataProcessor):
 
     def outputProcessor(self, modelOut, context):
         return modelOut
-
-    def getTrainingData(self, shuffle=True):
-        context = {}
-        context["isTrain"] = True
-        lenTrain = 0
-        lenValid = 0
-        trainDS = None
-        validDS = None
-        for i, ticker in enumerate(self.tickers):
-            context["ticker"] = ticker
-            data = self.tickerData[ticker]
-            splitIndex = math.floor(self.validationSplit * len(data))
-            lenTrain += len(data[:splitIndex])
-            lenValid += len(data[splitIndex:])
-            if i == 0:
-                trainDS = self.inputProcessor(data[:splitIndex], context)
-                validDS = self.inputProcessor(data[splitIndex:], context)
-            else:
-                tmpTrain = self.inputProcessor(data[:splitIndex], context)
-                tmpValid = self.inputProcessor(data[splitIndex:], context)
-                trainDS.concatenate(tmpTrain)
-                validDS.concatenate(tmpValid)
-        if shuffle:
-            trainDS.shuffle(lenTrain)
-            validDS.shuffle(lenValid)
-        trainDS = trainDS.batch(self.batchSize).prefetch(1)
-        validDS = validDS.batch(self.batchSize).prefetch(1)
-        return trainDS, validDS
 
     def convertToWindows(self, data, isTrain):
         """Converts the input data to a windowed dataset
@@ -243,22 +190,18 @@ class MultiVarProcessor(DataProcessor):
 
 class testProcessor(DataProcessor):
     def __init__(self, tickers, features, lookBack, forecast,
-                 targetFeature, isSeq2Seq=False, shuffle=True,
-                 validationSplit=0.9, batchSize=128):
+                 targetFeature, isSeq2Seq=False):
         super().__init__(tickers, features)
 
         self.lookBack = lookBack
         self.forecast = forecast
-        self.yInd = self.allFeatures.index(targetFeature.lower())
+        self.yInd = self.features.index(targetFeature)
         self.targetFeature = targetFeature
         self.tickers = tickers
         self.features = features
         self.isSeq2Seq = isSeq2Seq
 
         self.tickerData = self.getTickerData()
-        self.shuffle = shuffle
-        self.batchSize = batchSize
-        self.validationSplit = validationSplit
 
     def inputProcessor(self, data, context):
         tickerData = self.tickerData[context['ticker']]
@@ -275,7 +218,6 @@ class testProcessor(DataProcessor):
             return ds
 
     def outputProcessor(self, modelOut, context):
-        # print(modelOut)
         data = self.tickerData[context['ticker']][self.targetFeature]
         factor = max(data) - min(data)
         out = (modelOut * factor) + min(data)
@@ -283,34 +225,6 @@ class testProcessor(DataProcessor):
         for i, row in enumerate(out):
             nOut[i] = row[-self.forecast:].reshape(-self.forecast,)
         return nOut
-
-    def getTrainingData(self, shuffle=True):
-        context = {}
-        context["isTrain"] = True
-        lenTrain = 0
-        lenValid = 0
-        trainDS = None
-        validDS = None
-        for i, ticker in enumerate(self.tickers):
-            context["ticker"] = ticker
-            data = self.tickerData[ticker].copy()
-            splitIndex = math.floor(self.validationSplit * len(data))
-            lenTrain += len(data[:splitIndex])
-            lenValid += len(data[splitIndex:])
-            if i == 0:
-                trainDS = self.inputProcessor(data[:splitIndex], context)
-                validDS = self.inputProcessor(data[splitIndex:], context)
-            else:
-                tmpTrain = self.inputProcessor(data[:splitIndex], context)
-                tmpValid = self.inputProcessor(data[splitIndex:], context)
-                trainDS.concatenate(tmpTrain)
-                validDS.concatenate(tmpValid)
-        if shuffle:
-            trainDS.shuffle(lenTrain)
-            validDS.shuffle(lenValid)
-        trainDS = trainDS.batch(self.batchSize).prefetch(1)
-        validDS = validDS.batch(self.batchSize).prefetch(1)
-        return trainDS, validDS
 
     def convertToWindows(self, data, isTrain):
         data = data.values

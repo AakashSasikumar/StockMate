@@ -158,7 +158,8 @@ class RegressorBase():
         self.forecast = self.dataProcessor.forecast
 
     def train(self, epochs=1000, earlyStopping=True,
-              patience=15, callbacks=[]):
+              patience=15, callbacks=[], shuffle=False,
+              batchSize=64, validationSplit=0.7):
         """The method to start training the model
 
         Parameters
@@ -175,6 +176,14 @@ class RegressorBase():
             The number of epochs to wait for early stopping
         callbacks: list
             custom callbacks may be specified for training
+        validationSplit: float
+            The float indicating how much of the data should be used for
+            training. The other portion is used for validation.
+        shuffle: boolean
+            A boolean indicating whether the data should be shuffled before
+            training
+        batchSize: int
+            A number indicating the batchsize of the data for training
         """
         if self.dataProcessor is None:
             message = "DataProcessor not specified for this model"
@@ -185,16 +194,13 @@ class RegressorBase():
             callback = keras.callbacks.EarlyStopping(patience=patience)
             callbacks.append(callback)
 
-        trainDS, validDS = self.dataProcessor.getTrainingData()
+        trainDS, validDS = self.dataProcessor.getTrainingData(validationSplit,
+                                                              shuffle,
+                                                              batchSize)
 
         history = self.model.fit(trainDS, epochs=epochs,
                                  callbacks=callbacks,
                                  validation_data=validDS)
-        # X, Y, valX, valY = self.dataProcessor.getTrainingData()
-
-        # history = self.model.fit(x=X, y=Y, epochs=epochs,
-        #                          callbacks=callbacks, batch_size=32,
-        #                          validation_data=(valX, valY))
         self.history = history.history
 
     def makePredictions(self, data, context):
