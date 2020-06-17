@@ -264,7 +264,9 @@ class testProcessor(DataProcessor):
         tickerData = self.tickerData[context['ticker']]
         data = data.copy()
         for feature in self.features:
-            data[feature] = (data[feature] - min(tickerData[feature])) / (max(tickerData[feature]) - min(tickerData[feature]))
+            data[feature] = (data[feature] - min(tickerData[feature])) /\
+                            (max(tickerData[feature]) -
+                                min(tickerData[feature]))
         if context["isTrain"]:
             ds = self.convertToWindows(data, True)
             return ds

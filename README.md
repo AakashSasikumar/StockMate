@@ -195,8 +195,8 @@ forecast = 5
 
 # target feature is the feature that we want to predict
 # in this case it is the closing price
-dpf = MultiVarProcessor(tickers=constituents, features=["open", "high", "low", "close", "volume"],
-lookBack=lookBack, forecast=forecast, targetFeature="close", isSeq2Seq=True)
+dpf = MultiVarProcessor(tickers=constituents, features=["Open", "High", "Low", "Close", "Volume"],
+lookBack=lookBack, forecast=forecast, targetFeature="Close", isSeq2Seq=True)
 
 model = WaveNet()
 model.assignDataProcessor(dpf)
