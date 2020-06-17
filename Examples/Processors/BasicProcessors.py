@@ -1,7 +1,6 @@
 from Core.DataProcessor import DataProcessor
 import numpy as np
 from tensorflow import data as DS
-import math
 
 
 class UniVarProcessor(DataProcessor):
