@@ -120,7 +120,7 @@ class DataProcessor():
             A dictionary containing information about the usage of this
             function.
             This dictionary can contain the following keys
-                1. "tickers": The tickers for which the raw data has been
+                1. "ticker": The tickers for which the raw data has been
                               provided in data
                 2. "isTrain": A bool indicating whether this call is for
                               training or testing, as training requires
