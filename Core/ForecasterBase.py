@@ -52,14 +52,7 @@ class RegressorBase():
         will overwrite the existing saved files.
 
         This function writes the model and some additional details into
-        the specified location. The directory naming convention is as
-        follows,
-
-        directoryName = yyyy-mm-dd@HH:MM
-
-        if name is provided,
-
-        directoryName = {name}.yyy-mm-dd@HH:MM
+        the specified location.
 
         This method saves the following things:
         1. modelSummary.txt
