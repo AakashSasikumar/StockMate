@@ -247,3 +247,31 @@ class testProcessor(DataProcessor):
             dataset = dataset.flat_map(lambda w: w.batch(self.lookBack))
             dataset = dataset.batch(1).prefetch(1)
             return dataset
+
+
+class DQNProcessor(DataProcessor):
+    """A basic DPF implementation for a Q Learning Agent
+
+    This DPF supports QLearning.BasicDQN and QLearning.WaveNetDQN.
+
+    """
+    def __init__(self, tickers, features, lookBack):
+        super().__init__(tickers, features)
+        self.lookBack = lookBack
+
+    def inputProcessor(self, data, context):
+        return data
+        # return data.reshape(1, self.lookBack, 1)  # use this for WaveNet
+
+    def outputProcessor(self, modelOut, context):
+        return modelOut
+
+    def getTrainingData(self):
+        ticker = self.tickers[0]
+        rawData = self.tickerData[ticker].copy()
+        rawData = rawData.diff(1).dropna().values.reshape(len(rawData)-1)
+        shape = rawData.shape[:-1] + \
+            (rawData.shape[-1] - self.lookBack + 1, self.lookBack)
+        strides = rawData.strides + (rawData.strides[-1],)
+        return np.lib.stride_tricks.as_strided(rawData, shape=shape,
+                                               strides=strides)

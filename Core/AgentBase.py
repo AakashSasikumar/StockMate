@@ -1,30 +1,84 @@
-from tensorflow import keras
+import numpy as np
 import os
 import pickle
 import dill
+from tensorflow import keras
 
 
-class RegressorBase():
-    """A wrapper for all keras based regression networks
+class AgentBase:
+    def __init__(self, initialMoney):
+        self.dataProcessor = None
+        self.actions = self.initActions()
 
-    Attributes
-    ----------
-    model: keras.model
-        The keras model
-    history: keras.callbacks.callbacks.History
-        The train history of the model
-    dataProcessor: Core.DataProcessor
-        The data processor for the model
-    """
-    def buildModel(self, learningRate=None):
-        """Builds the model and sets the class attribute
+        self.orderBook = []
+        self.initialMoney = initialMoney
+        self.money = initialMoney
+        self.profit = 0
+        self.history = None
+
+    def assignDataProcessor(self, dataProcessor):
+        self.dataProcessor = dataProcessor
+        self.lookBack = dataProcessor.lookBack
+        self.tickerData = self.dataProcessor.tickerData.copy()
+
+    def initActions(self):
+        """Method to initialize all the possible actions for agents
+
+        As of now there are three actions possible,
+            1. Buy - 0
+            2. Sell - 1
+            3. Hold - 2
+
+        Support for shorting will be added later
+        """
+        self.ACTION_BUY = 0
+        self.ACTION_SELL = 1
+        self.ACTION_HOLD = 2
+        self.allActions = [self.ACTION_BUY, self.ACTION_SELL, self.ACTION_HOLD]
+        self.actionSize = len(self.allActions)
+
+    def getAction(self, state):
+        """Method to get the action from the model given the current state
+
+        This method uses the specified dataProcessor to get the proper action
+        chosen by the model.
 
         Parameters
         ----------
-        learningRate: float, optional
-            The learning rate for the optimizer
+        state: numpy.array
+            The representation of the current state
+
+        Returns
+        -------
+        action: int
+            The action chosen by the model
         """
-        raise NotImplementedError("Must override buildModel")
+        processedInput = self.dataProcessor.inputProcessor(state, None)
+        modelOut = self.model.predict(processedInput)
+        processedOutput = self.dataProcessor.outputProcessor(modelOut, None)
+        return np.argmax(processedOutput)
+
+    def handleAction(self, action, price):
+        """Method to carry out additional tasks from model output
+
+        This method is used to carry out any other background tasks that needs
+        to do done based on the action chosen by the model. Currently, this method
+        is to update the orderbook and keep a track of profits made.
+
+        Parameters
+        ----------
+        action: int
+            The action chosen by the model
+        price: float
+            The price at which the action was chosen
+        """
+        if action == self.ACTION_BUY and self.money >= price:
+            self.orderBook.append(price)
+            self.money -= price
+        elif action == self.ACTION_SELL and len(self.orderBook) > 0:
+            lastPrice = self.orderBook.pop()
+            self.profit += price - lastPrice
+            self.money += price
 
     def getProjectRoot(self):
         """Returns the root directory of the folder
@@ -45,7 +99,7 @@ class RegressorBase():
         return currentPath + "/"
 
     def saveModel(self, name,
-                  savePath="DataStore/SavedModels/Forecasters/"):
+                  savePath="DataStore/SavedModels/Agents/"):
         """Saves the model into the specified path.
 
         NOTE: If name already exists in the directory, calling saveModel
@@ -107,7 +161,7 @@ class RegressorBase():
         with open(savePath + "dataProcessor.dill", "wb+") as f:
             dill.dump(self.dataProcessor, f)
 
-    def loadModel(self, name, savePath="DataStore/SavedModels/Forecasters/"):
+    def loadModel(self, name, savePath="DataStore/SavedModels/Agents/"):
         """Loads the specified model.
 
         This method is just for preparing the input and exception
@@ -129,7 +183,7 @@ class RegressorBase():
             raise Exception(message)
         savePath = modelPath
         savePath = "{}/{}".format(savePath, name)
-        model, dp = RegressorBase.loadAll(savePath)
+        model, dp = AgentBase.loadAll(savePath)
         self.model = model
         self.dataProcessor = dp
 
@@ -148,84 +202,3 @@ class RegressorBase():
         with open(path + "/dataProcessor.dill", "rb") as f:
             dataProcessor = dill.load(f)
         return model, dataProcessor
-
-    def assignDataProcessor(self, dataProcessor):
-        """Method to assign the dataProcessor
-
-        Parameters
-        ----------
-        dataProcessor: Object
-            The child of Core.DataProcessor with all methods
-            implemented
-        """
-        self.dataProcessor = dataProcessor
-        self.lookBack = self.dataProcessor.lookBack
-        self.forecast = self.dataProcessor.forecast
-
-    def train(self, epochs=1000, earlyStopping=True,
-              patience=15, callbacks=[], shuffle=False,
-              batchSize=64, validationSplit=0.7):
-        """The method to start training the model
-
-        Parameters
-        ----------
-        validationSplit: float
-            The ratio in which the input data has to be split into
-            training and validation.
-        epochs: int, optional
-            The number of epochs to train for
-        earlyStopping: boolean, optional
-            Specify whether early stopping based on validation
-            loss is required (recommended to keep it as True)
-        patience: int, optional
-            The number of epochs to wait for early stopping
-        callbacks: list
-            custom callbacks may be specified for training
-        validationSplit: float
-            The float indicating how much of the data should be used for
-            training. The other portion is used for validation.
-        shuffle: boolean
-            A boolean indicating whether the data should be shuffled before
-            training
-        batchSize: int
-            A number indicating the batchsize of the data for training
-        """
-        if self.dataProcessor is None:
-            message = "DataProcessor not specified for this model"
-            raise Exception(message)
-
-        keras.backend.clear_session()
-        if earlyStopping:
-            callback = keras.callbacks.EarlyStopping(patience=patience)
-            callbacks.append(callback)
-
-        trainDS, validDS = self.dataProcessor.getTrainingData(validationSplit,
-                                                              shuffle,
-                                                              batchSize)
-
-        history = self.model.fit(trainDS, epochs=epochs,
-                                 callbacks=callbacks,
-                                 validation_data=validDS)
-        self.history = history.history
-
-    def makePredictions(self, data, context):
-        """Formats the data and returns the model prediction
-
-        This method takes in the raw data, and converts it into the model's
-        input specification.
-
-        Parameters
-        ----------
-        data: numpy.ndarray
-            The input data for prediction
-        batchSize: int, optional
-            The batchSize of the data
-
-        Returns
-        -------
-        prediction: numpy.ndarray
-            The model's prediction
-        """
-        procInput = self.dataProcessor.inputProcessor(data, context)
-        prediction = self.model.predict(procInput)
-        return self.dataProcessor.outputProcessor(prediction, context)
