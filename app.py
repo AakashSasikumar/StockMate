@@ -96,6 +96,15 @@ def createAgents():
     return render_template("createAgents.html", title=title, pageName=pageName)
 
 
+@app.route("/toggleAgentSubscription", methods=["POST"])
+def toggleAgentSubscription():
+    modelData = request.json
+    urh.toggleAgentSubscription(modelData)
+    print(modelData)
+    return (json.dumps({'success': True}), 200,
+            {'ContentType': 'application/json'})
+
+
 @app.route("/subscriptions")
 def subscriptions():
     pageName = "Create Forecasters"

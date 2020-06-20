@@ -196,6 +196,24 @@ function embedPlot(e) {
     }
 }
 
+function subscribeAgentToggle(element, modelParams) {
+    console.log(modelParams);
+    var agentName = Object.keys(modelParams)[0];
+    var subscribeButton = element;
+    var payload = new Object();
+    if (subscribeButton.checked == true) {
+        payload["agentName"] = agentName;
+        payload["savePath"] = modelParams[agentName]["savePath"];
+        payload["subscribe"] = 1;
+    }
+    else {
+        payload["agentName"] = agentName;
+        payload["savePath"] = modelParams[agentName]["savePath"];
+        payload["subscribe"] = 0;
+    }
+    sendPayload(payload, "/toggleAgentSubscription", type="POST")
+}
+
 function sendPayload(payload, url, type="POST", success=handleSuccess, error=handleFailure) {
     $.ajax({
         type: type,

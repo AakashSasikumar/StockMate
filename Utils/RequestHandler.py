@@ -321,3 +321,26 @@ def getTickerData(ticker):
     df = pd.read_csv("DataStore/StockData/{}.csv".format(ticker),
                      index_col="Date", parse_dates=["Date"])
     return df
+
+
+def toggleAgentSubscription(modelData):
+    """Method to subscribe and unsubscribe to agents
+
+    Parameters
+    ----------
+    modelData: dict
+        The specifications of the agent
+    """
+
+    template = "{}/{}"
+    with open(template.format(modelData["savePath"], "AgentInfo.json")) as f:
+        agentInfo = json.load(f)
+    if modelData["subscribe"]:
+        # TODO: Implement subscribe methods
+        agentInfo["subscribed"] = modelData["subscribe"]
+    else:
+        # TODO: Implement unsubscribe methods
+        agentInfo["subscribed"] = modelData["subscribe"]
+
+    with open(template.format(modelData["savePath"], "AgentInfo.json"), "w+") as f:
+        json.dump(agentInfo, f)

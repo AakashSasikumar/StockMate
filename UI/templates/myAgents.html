@@ -64,6 +64,7 @@
                           <th>Last Updated</th>
                           <th>Num Tickers</th>
                           <th>Num Features</th>
+                          <th>Subscribe</th>
                         </tr>
                       </thead>
                       <tfoot>
@@ -73,6 +74,7 @@
                           <th>Last Updated</th>
                           <th>Num Tickers</th>
                           <th>Num Features</th>
+                          <th>Subscribe</th>
                         </tr>
                       </tfoot>
                       <tbody>
@@ -83,9 +85,17 @@
                             <td>{{savedModels[agent]["dateSaved"]}}</td>
                             <td>{{savedModels[agent]["tickers"]|length}}</td>
                             <td>{{savedModels[agent]["features"]|length}}</td>
+                            {% if savedModels[agent]["subscribed"] %}
+                              <td><input id="{{agent}}" type="checkbox" onclick="subscribeAgentToggle(this, {{savedModels}})"></td>
+                              <script>
+                                var agent = document.getElementById("{{agent}}");
+                                agent.checked = true;
+                              </script>
+                            {% else %}
+                              <td><input type="checkbox" onclick="subscribeAgentToggle(this, {{savedModels}})"></td>
+                            {% endif %}
                           </tr>
                         {% endfor %}
-
                         </tr>
                       </tbody>
                     </table>

@@ -173,7 +173,13 @@ def getAllSavedAgents(savePath="DataStore/SavedModels/Agents"):
                 savedAgents[agent]["features"] = modelInfo["features"]
                 savedAgents[agent]["dateSaved"] = modelInfo["savedTime"]
                 savedAgents[agent]["baseClass"] = folder
-                savedAgents[agent]["savePath"] = savePath
+                savedAgents[agent]["savePath"] = template.format(folderPath,
+                                                                 agent)
+                if "subscribed" not in modelInfo:
+                    savedAgents[agent]["subscribed"] = 0
+                else:
+                    savedAgents[agent]["subscribed"] = modelInfo["subscribed"]
+                print(modelInfo)
     return savedAgents
 
 
