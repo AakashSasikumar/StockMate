@@ -18,15 +18,16 @@ websiteName = "StockMate"
 
 def init():
     uint.init()
-    if "telegramAPIData.json" in os.listdir():
-        tbot.init()
-        tbot.startListening()
+    # if "telegramAPIData.json" in os.listdir():
+    #     tbot.init()
+    #     tbot.startListening()
 
 
 @app.route("/")
 def index():
     return render_template("index.html", title=websiteName,
-                           numForecasters=len(uint.getAllSavedForecasters()))
+                           numForecasters=len(uint.getAllSavedForecasters()),
+                           numAgents=len(uint.getAllSavedAgents()))
 
 
 @app.route("/myForecasters")
@@ -84,7 +85,8 @@ def myAgents():
     pageName = "My Agents"
     title = "{}-{}".format(websiteName, pageName)
     return render_template("myAgents.html", title=title,
-                           pageName=pageName)
+                           pageName=pageName,
+                           savedModels=uint.getAllSavedAgents())
 
 
 @app.route("/createAgents")

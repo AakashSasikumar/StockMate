@@ -3,6 +3,8 @@ import os
 import pickle
 import dill
 from tensorflow import keras
+import datetime
+import json
 
 
 class AgentBase:
@@ -122,6 +124,12 @@ class AgentBase:
             The trained model
         5. dataProcessor
             The data processor used for this model
+        6. AgentInfo.json
+            A json file containing the following information
+                - Tickers and features used to train the model
+                - The datetime of saving
+            This file is used for the UI to quickly get model information
+            without having to load the dataProcessor
 
         Parameters
         ----------
@@ -160,6 +168,13 @@ class AgentBase:
                         include_optimizer=True)
         with open(savePath + "dataProcessor.dill", "wb+") as f:
             dill.dump(self.dataProcessor, f)
+
+        with open(savePath + "AgentInfo.json", "w+") as f:
+            writeJson = {}
+            writeJson["tickers"] = self.dataProcessor.tickers
+            writeJson["features"] = self.dataProcessor.features
+            writeJson["savedTime"] = str(datetime.datetime.now())[:-10]
+            json.dump(writeJson, f)
 
     def loadModel(self, name, savePath="DataStore/SavedModels/Agents/"):
         """Loads the specified model.

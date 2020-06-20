@@ -45,7 +45,7 @@
                   Forecasters
                 </div>
                 <div class="card-body">
-                  Forecasters can predict future stock prices. The options below should help you build a custom forecaster. Keep in mind that none of these model
+                  Forecasters can predict future stock prices. Keep in mind that none of these model
                   predictions are 100% accurate, so please use at your own risk.
                 </div>
               </div>
@@ -56,17 +56,40 @@
                   <h6 class="m-0 font-weight-bold text-primary">My Forecasters</h6>
                 </div>
                 <div class="card-body">
-                  <form action="viewForecaster" method="GET">
-                    <label for="savedModelSelection">Saved Model</label>
-                    <select name="selectedModel" id="savedModelSelection" class="form-control2 bg-light border-0 small" required>
-                      {% for model in savedModels.keys() %}
-                      <option value="{{'{}/{}/{}'.format(savedModels[model]['savePath'], savedModels[model]['baseClass'], model)}}">{{'{}.{}'.format(savedModels[model]['baseClass'], model)}}</option>
-                      {% endfor %}
-                    </select>
-                    <div id="savedModelButtons">
-                      <input id="viewSavedModel" class="btn btn-primary" value="View Prediction" type="submit">
-                    </div>
-                  </form>
+                  <div class="table-responsive">
+                    <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                      <thead>
+                        <tr>
+                          <th>Name</th>
+                          <th>Class</th>
+                          <th>Last Updated</th>
+                          <th>Num Tickers</th>
+                          <th>Num Features</th>
+                        </tr>
+                      </thead>
+                      <tfoot>
+                        <tr>
+                          <th>Name</th>
+                          <th>Class</th>
+                          <th>Last Updated</th>
+                          <th>Num Tickers</th>
+                          <th>Num Features</th>
+                        </tr>
+                      </tfoot>
+                      <tbody>
+                        {% for model in savedModels: %}
+                          <tr>
+                            <td><a href="{{'viewForecaster?selectedModel={}/{}/{}'.format(savedModels[model]['savePath'], savedModels[model]['baseClass'], model)}}">{{model}}</a></td>
+                            <td>{{savedModels[model]["baseClass"]}}</td>
+                            <td>{{savedModels[model]["dateSaved"]}}</td>
+                            <td>{{savedModels[model]["tickers"]|length}}</td>
+                            <td>{{savedModels[model]["features"]|length}}</td>
+                          </tr>
+                        {% endfor %}
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
                 </div>
               </div>
 

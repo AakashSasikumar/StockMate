@@ -129,13 +129,52 @@ def getAllIndicesAndConstituents():
 
 def getAllSavedForecasters(savePath="DataStore/SavedModels/Forecasters"):
     savedModels = {}
+    skipList = [".DS_Store"]
     for folder in os.listdir(savePath):
         template = "{}/{}"
-        for model in os.listdir(template.format(savePath, folder)):
-            savedModels[model] = {}
-            savedModels[model]["baseClass"] = folder
-            savedModels[model]["savePath"] = savePath
+        folderPath = template.format(savePath, folder)
+        if folder in skipList:
+            continue
+        if os.path.isdir(folderPath):
+            for model in os.listdir(folderPath):
+                if model in skipList:
+                    continue
+                infoFile = template.format(folderPath, model)
+                infoFile = template.format(infoFile, "ForecasterInfo.json")
+                with open(infoFile) as f:
+                    modelInfo = json.load(f)
+                savedModels[model] = {}
+                savedModels[model]["tickers"] = modelInfo["tickers"]
+                savedModels[model]["features"] = modelInfo["features"]
+                savedModels[model]["dateSaved"] = modelInfo["savedTime"]
+                savedModels[model]["baseClass"] = folder
+                savedModels[model]["savePath"] = savePath
     return savedModels
+
+
+def getAllSavedAgents(savePath="DataStore/SavedModels/Agents"):
+    skipList = [".DS_Store"]
+    savedAgents = {}
+    for folder in os.listdir(savePath):
+        template = "{}/{}"
+        folderPath = template.format(savePath, folder)
+        if folder in skipList:
+            continue
+        if os.path.isdir(folderPath):
+            for agent in os.listdir(folderPath):
+                if agent in skipList:
+                    continue
+                infoFile = template.format(folderPath, agent)
+                infoFile = template.format(infoFile, "AgentInfo.json")
+                with open(infoFile) as f:
+                    modelInfo = json.load(f)
+                savedAgents[agent] = {}
+                savedAgents[agent]["tickers"] = modelInfo["tickers"]
+                savedAgents[agent]["features"] = modelInfo["features"]
+                savedAgents[agent]["dateSaved"] = modelInfo["savedTime"]
+                savedAgents[agent]["baseClass"] = folder
+                savedAgents[agent]["savePath"] = savePath
+    return savedAgents
 
 
 def getAllFeatures():

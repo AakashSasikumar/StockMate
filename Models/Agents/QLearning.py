@@ -91,7 +91,7 @@ class BasicDQN(AgentBase):
 
             self.model.fit(X, Y)
             if self.epsilon > self.epsilonMin:
-                self.epsilonMin *= self.epsilonDecay
+                self.epsilon *= self.epsilonDecay
 
     def train(self, epochs=200, logFreq=1):
         self.trainData = self.dataProcessor.getTrainingData()
@@ -207,7 +207,7 @@ class WaveNetDQN(AgentBase):
 
             self.model.fit(X, Y)
             if self.epsilon > self.epsilonMin:
-                self.epsilonMin *= self.epsilonDecay
+                self.epsilon *= self.epsilonDecay
 
     def train(self, epochs=200, logFreq=1):
         self.trainData = self.dataProcessor.getTrainingData()
@@ -236,3 +236,4 @@ class WaveNetDQN(AgentBase):
                 self.history["profit"].append(self.profit)
                 self.history["total_money"].append(self.money)
                 print(logStr.format(epoch, epochs, self.profit, self.money))
+                print(self.epsilon)
