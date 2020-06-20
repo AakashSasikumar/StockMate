@@ -333,6 +333,7 @@ def getTickerData(ticker):
     """
     df = pd.read_csv("DataStore/StockData/{}.csv".format(ticker),
                      index_col="Date", parse_dates=["Date"])
+    df.sort_index(ascending=True)
     return df
 
 

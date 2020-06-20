@@ -110,7 +110,7 @@ class BasicDQN(AgentBase):
                 if random.random() <= self.epsilon:
                     action = random.randrange(self.actionSize)
                 else:
-                    action = self.getAction(currentState.reshape(1, -1))
+                    action = self.getAction(currentState)
                 reward = self.getReward(action, currentPrice)
                 self.memory.append((currentState, action, reward, nextState))
                 self.updateWeights()
@@ -226,7 +226,7 @@ class WaveNetDQN(AgentBase):
                 if random.random() <= self.epsilon:
                     action = random.randrange(self.actionSize)
                 else:
-                    action = self.getAction(currentState.reshape(1, -1))
+                    action = self.getAction(currentState)
                 reward = self.getReward(action, currentPrice)
                 self.memory.append((currentState, action, reward, nextState))
                 self.updateWeights()

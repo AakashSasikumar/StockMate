@@ -55,10 +55,9 @@ class AgentBase:
         action: int
             The action chosen by the model
         """
-        processedInput = self.dataProcessor.inputProcessor(state, None)
-        modelOut = self.model.predict(processedInput)
-        processedOutput = self.dataProcessor.outputProcessor(modelOut, None)
-        return np.argmax(processedOutput)
+        modelOut = self.model.predict(state)
+        action = self.dataProcessor.outputProcessor(modelOut, None)
+        return action
 
     def handleAction(self, action, price):
         """Method to carry out additional tasks from model output
