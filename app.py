@@ -39,15 +39,22 @@ def myForecasters():
                            savedModels=uint.getAllSavedForecasters())
 
 
-@app.route("/viewForecaster", methods=["GET"])
+@app.route("/viewModel", methods=["GET"])
 def viewForecasters():
     modelLoc = request.args["selectedModel"]
-    tickers = urh.getTickers(modelLoc)
-    title = "{}-{}".format(websiteName, modelLoc.split("/")[-1])
-    return render_template("viewForecaster.html", title=title,
-                           modelName=modelLoc.split("/")[-1],
+    modelType = request.args["type"]
+    modelName = modelLoc.split("/")[-1]
+    if modelType == "agent":
+        tickers = uint.getAllSavedAgents()[modelName]["tickers"]
+    elif modelType == "forecaster":
+        tickers = uint.getAllSavedForecasters()[modelName]["tickers"]
+
+    title = "{}-{}".format(websiteName, modelName)
+    return render_template("viewModel.html", title=title,
+                           modelName=modelName,
                            modelLoc=modelLoc,
-                           tickers=tickers)
+                           tickers=tickers,
+                           modelType=modelType)
 
 
 @app.route("/getPlot", methods=["POST"])
@@ -56,8 +63,13 @@ def getPlot():
     modelLoc = request.json["modelLoc"]
     plotType = request.json["plotType"]
     numDays = request.json["numDays"]
-    figure = urh.getTickerPlot(modelLoc, ticker,
-                               plotType, numDays)
+    modelType = request.json["type"]
+    if modelType == "forecaster":
+        figure = urh.getForecasterPlot(modelLoc, ticker,
+                                       plotType, numDays)
+    elif modelType == "agent":
+        figure = urh.getAgentPlot(modelLoc, ticker,
+                                  plotType, numDays)
     return figure
 
 
@@ -100,7 +112,6 @@ def createAgents():
 def toggleAgentSubscription():
     modelData = request.json
     urh.toggleAgentSubscription(modelData)
-    print(modelData)
     return (json.dumps({'success': True}), 200,
             {'ContentType': 'application/json'})
 

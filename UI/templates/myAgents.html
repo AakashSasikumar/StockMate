@@ -80,7 +80,7 @@
                       <tbody>
                         {% for agent in savedModels: %}
                           <tr>
-                            <td>{{agent}}</td>
+                            <td><a href="{{'viewModel?type=agent&selectedModel={}'.format(savedModels[agent]['savePath'])}}">{{agent}}</a></td>
                             <td>{{savedModels[agent]["baseClass"]}}</td>
                             <td>{{savedModels[agent]["dateSaved"]}}</td>
                             <td>{{savedModels[agent]["tickers"]|length}}</td>

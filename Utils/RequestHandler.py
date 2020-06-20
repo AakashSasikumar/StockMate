@@ -54,8 +54,8 @@ def createForecaster(modelData):
         the UI
     """
     try:
-        model = getForecasterClass(modelData["moduleLoc"],
-                                   modelData["model"])
+        model = getModelClass(modelData["moduleLoc"],
+                              modelData["model"])
     except Exception:
         # TODO: Implementing a logger
         message = "There was an error creating {}. Please check logs"
@@ -87,7 +87,7 @@ def createForecaster(modelData):
     afterTrainProcedure(history, modelData)
 
 
-def getForecasterClass(moduleLoc, model):
+def getModelClass(moduleLoc, model):
     """Method to return the Object of the specified model
 
     Parameters
@@ -217,7 +217,7 @@ def retrainForecaster():
     moduleLoc = lastTrainedModelData["moduleLoc"]
     model = lastTrainedModelData["model"]
     modelName = lastTrainedModelData["modelName"]
-    model = getForecasterClass(moduleLoc, model)
+    model = getModelClass(moduleLoc, model)
     model = model()
     model.loadModel(modelName)
     tbot.sendMessage("Retraining {}".format(modelName))
@@ -249,7 +249,7 @@ def getTickers(modelLoc):
     return dataProc.tickers
 
 
-def getTickerPlot(modelLoc, ticker, plotType, numDays):
+def getForecasterPlot(modelLoc, ticker, plotType, numDays, modelType):
     """Method to get the plotly plots for the ticker
 
     This method plots the entire raw data for the ticker as well
@@ -266,6 +266,8 @@ def getTickerPlot(modelLoc, ticker, plotType, numDays):
         The type of plot that is to be plotted
     numDays: str
         The number of days used for the model prediction
+    modelType: str
+        Indicates whether the model is an agent or a forecaster
 
     Returns
     -------
@@ -274,34 +276,45 @@ def getTickerPlot(modelLoc, ticker, plotType, numDays):
     """
     modelName = modelLoc.split("/")[-2]
     modelSaveName = modelLoc.split("/")[-1]
-    modelLoc = uint.allForecasters[modelName]["moduleLoc"]
+    if modelType == "forecaster":
+        moduleLoc = uint.allForecasters[modelName]["moduleLoc"]
+    elif modelType == "agent":
+        moduleLoc = uint.allAgents[modelName]["moduleLoc"]
 
     numDays = int(numDays)
 
-    model = getForecasterClass(modelLoc, modelName)
+    model = getModelClass(moduleLoc, modelName)
     model = model()
     model.loadModel(modelSaveName)
-
-    allData = getTickerData(ticker)
-    allData = model.dataProcessor.getFeatures(allData)
-    targetFeature = model.dataProcessor.allFeatures[model.dataProcessor.yInd]
-    context = {"isTrain": False,
-               "ticker": ticker}
 
     if numDays < model.dataProcessor.lookBack and numDays != -1:
         message = ("Cannot predict for numDays={} when model's"
                    " lookBack={}")
         return {"error": message.format(numDays,
                                         model.dataProcessor.lookBack)}
+
+    allData = getTickerData(ticker)
+    allData = model.dataProcessor.getFeatures(allData)
+    targetFeature = model.dataProcessor.allFeatures[model.dataProcessor.yInd]
+
     if numDays == -1 or numDays >= len(allData):
         reqData = allData
     else:
         numDays = int(numDays)
         reqData = allData[-numDays:]
+
+    context = {"isTrain": False,
+               "ticker": ticker}
+
     prediction = model.makePredictions(reqData, context)
-    figure = plot.getModelPredictionFigure(ticker, allData, prediction,
-                                           targetFeature.capitalize(),
-                                           plotType)
+    if modelType == "forecaster":
+        figure = plot.getForecasterPredictionFigure(ticker, allData,
+                                                    prediction,
+                                                    targetFeature.capitalize(),
+                                                    plotType)
+    elif modelType == "agent":
+        figure = plot.getAgentPredictionFigure(ticker, allData, prediction,
+                                               plotType)
     return figure
 
 

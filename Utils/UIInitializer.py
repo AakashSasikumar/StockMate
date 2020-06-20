@@ -12,16 +12,20 @@ def init():
 
     Retrieves all keras models and their parameters.
     """
+    global allForecasters, allAgents
+
     sys.path.append("/Users/aakashsasikumar/Documents/Code/Python/StockMate/")
     kerasLayers = getKerasLayers()
-    initForecasterDetails(kerasLayers)
+    allForecasters = initModelDetails(kerasLayers)
+    allAgents = initModelDetails(kerasLayers, location="Models/Agents")
+    print(allAgents)
 
 
 def getKerasLayers():
     """Method to get all layers in Keras
 
     This method is used to filter out false detections when getting
-    model details. The initForecasterDetails() method will skip classes
+    model details. The initModelDetails() method will skip classes
     that come under keras layers.
     """
     kerasLayers = inspect.getmembers(keras.layers, inspect.isclass)
@@ -29,9 +33,10 @@ def getKerasLayers():
     return kerasLayers
 
 
-def initForecasterDetails(kerasLayers, location="Models/Forecasters",
-                          skipList=["NaiveModel", "BasicRegressor",
-                                    "DenseRegressor", "RegressorBase"]):
+def initModelDetails(kerasLayers, location="Models/Forecasters",
+                     skipList=["NaiveModel", "BasicRegressor",
+                               "DenseRegressor", "RegressorBase",
+                               "AgentBase"]):
     """Method to get all the details of defined models
 
     The details include:
@@ -49,9 +54,8 @@ def initForecasterDetails(kerasLayers, location="Models/Forecasters",
     skipList: list
         A list of all the models that are to be skipped by this method
     """
-    global allForecasters
 
-    allForecasters = {}
+    allModels = {}
 
     rootImport = location.replace("/", ".")
     for forecasterType in os.listdir(location):
@@ -65,12 +69,13 @@ def initForecasterDetails(kerasLayers, location="Models/Forecasters",
                 if forecasterName not in kerasLayers and \
                    forecasterName not in skipList:
 
-                    allForecasters[forecasterName] = {}
-                    allForecasters[forecasterName]["description"] = \
+                    allModels[forecasterName] = {}
+                    allModels[forecasterName]["description"] = \
                         getForecasterDescription(forecaster[1].__doc__)
-                    allForecasters[forecasterName]["params"] = \
+                    allModels[forecasterName]["params"] = \
                         getForecasterParams(forecaster[1].__doc__)
-                    allForecasters[forecasterName]["moduleLoc"] = moduleLoc
+                    allModels[forecasterName]["moduleLoc"] = moduleLoc
+    return allModels
 
 
 def getForecasterDescription(docString):
@@ -179,7 +184,6 @@ def getAllSavedAgents(savePath="DataStore/SavedModels/Agents"):
                     savedAgents[agent]["subscribed"] = 0
                 else:
                     savedAgents[agent]["subscribed"] = modelInfo["subscribed"]
-                print(modelInfo)
     return savedAgents
 
 

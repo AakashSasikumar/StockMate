@@ -79,7 +79,7 @@
                       <tbody>
                         {% for model in savedModels: %}
                           <tr>
-                            <td><a href="{{'viewForecaster?selectedModel={}/{}/{}'.format(savedModels[model]['savePath'], savedModels[model]['baseClass'], model)}}">{{model}}</a></td>
+                            <td><a href="{{'viewModel?type=forecaster&selectedModel={}/{}/{}'.format(savedModels[model]['savePath'], savedModels[model]['baseClass'], model)}}">{{model}}</a></td>
                             <td>{{savedModels[model]["baseClass"]}}</td>
                             <td>{{savedModels[model]["dateSaved"]}}</td>
                             <td>{{savedModels[model]["tickers"]|length}}</td>

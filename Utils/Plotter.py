@@ -5,8 +5,8 @@ from datetime import timedelta
 import pandas as pd
 
 
-def getModelPredictionFigure(ticker, data, prediction, targetFeature,
-                             plotType):
+def getForecasterPredictionFigure(ticker, data, prediction, targetFeature,
+                                  plotType):
     """Method to plot stock data and model predictions
 
     This method uses plotly to plot the data and returns the encoded json
@@ -40,11 +40,71 @@ def getModelPredictionFigure(ticker, data, prediction, targetFeature,
     else:
         # Type not supported
         raise Exception("Plot type {} not supported".format(plotType))
-    predictionPlots = plotModelPrediction(data, prediction)
+    predictionPlots = plotForecasterPrediction(data, prediction)
     figure = go.Figure()
     figure.add_trace(basePlot)
     for plots in predictionPlots:
         figure.add_trace(plots)
+    figure.update_layout(autosize=False,
+                         height=700,
+                         width=1100,
+                         title=ticker,
+                         showlegend=False,
+                         dragmode="pan")
+
+    figure.update_xaxes(
+        rangeslider_visible=True,
+        rangeselector=dict(
+            buttons=list([
+                dict(count=1, label="1m", step="month", stepmode="backward"),
+                dict(count=6, label="6m", step="month", stepmode="backward"),
+                dict(count=1, label="YTD", step="year", stepmode="todate"),
+                dict(count=1, label="1y", step="year", stepmode="backward"),
+                dict(step="all")
+            ])
+        )
+    )
+    figure = json.dumps(figure, cls=encoder)
+    return figure
+
+
+def getAgentPredictionFigure(ticker, data, prediction, plotType):
+    """Method to plot stock data and model predictions
+
+    This method uses plotly to plot the data and returns the encoded json
+    format to the UI.
+
+    Parameters
+    ----------
+    ticker: str
+        The ticker symbol which is to be plotted. This is used as the title
+        of the plot
+    data: pandas.DataFrame
+        The raw data of the ticker
+    prediction: numpy.array
+        The model's output after being passed through
+        DataProcessor.outputProcessor()
+    plotType: str
+        The type of plot that is to be plotted. Currently these plots are
+        supported,
+            1. Line Chart
+
+    Returns
+    -------
+    figure: str
+        The plotly figure encoded into a JSON format
+    """
+    if plotType == "lineChart":
+        basePlot = makeLineChart(data.index.date, data["Close"],
+                                 name="Actual")
+    else:
+        # Type not supported
+        raise Exception("Plot type {} not supported".format(plotType))
+
+    predictionPlot = plotAgentPrediction(data, prediction)
+    figure = go.Figure()
+    figure.add_trace(basePlot)
+    figure.add_trace(predictionPlot)
     figure.update_layout(autosize=False,
                          height=700,
                          width=1100,
@@ -86,7 +146,7 @@ def makeLineChart(x, y, line=None, name=None):
     return plot
 
 
-def plotModelPrediction(data, predictions):
+def plotForecasterPrediction(data, predictions):
     """Method to plot all the predictions
 
     This method takes care of preserving the dates of the predictions.

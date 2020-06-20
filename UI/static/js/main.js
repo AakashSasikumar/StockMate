@@ -184,6 +184,7 @@ function getPlotForTicker(modelLoc) {
     payload["ticker"] = ticker;
     payload["plotType"] = plotType;
     payload["numDays"] = numDays;
+    payload["type"] = modelType;
     sendPayload(payload, "/getPlot", type="POST", success=embedPlot);
 }
 
