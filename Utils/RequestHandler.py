@@ -295,7 +295,6 @@ def getForecasterPlot(modelLoc, ticker, plotType, numDays, modelType):
 
     allData = getTickerData(ticker)
     allData = model.dataProcessor.getFeatures(allData)
-    targetFeature = model.dataProcessor.allFeatures[model.dataProcessor.yInd]
 
     if numDays == -1 or numDays >= len(allData):
         reqData = allData
@@ -305,15 +304,18 @@ def getForecasterPlot(modelLoc, ticker, plotType, numDays, modelType):
 
     context = {"isTrain": False,
                "ticker": ticker}
-
-    prediction = model.makePredictions(reqData, context)
     if modelType == "forecaster":
+        predictions = model.makePredictions(reqData, context)
+    elif modelType == "agent":
+        predictions = model.getAllActions(reqData, context)
+    if modelType == "forecaster":
+        targetFeature = model.dataProcessor.allFeatures[model.dataProcessor.yInd]
         figure = plot.getForecasterPredictionFigure(ticker, allData,
-                                                    prediction,
+                                                    predictions,
                                                     targetFeature.capitalize(),
                                                     plotType)
     elif modelType == "agent":
-        figure = plot.getAgentPredictionFigure(ticker, allData, prediction,
+        figure = plot.getAgentPredictionFigure(ticker, allData, predictions,
                                                plotType)
     return figure
 

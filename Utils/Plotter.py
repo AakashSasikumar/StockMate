@@ -101,15 +101,16 @@ def getAgentPredictionFigure(ticker, data, prediction, plotType):
         # Type not supported
         raise Exception("Plot type {} not supported".format(plotType))
 
-    predictionPlot = plotAgentPrediction(data, prediction)
+    predictionPlots = plotAgentPrediction(data, prediction)
     figure = go.Figure()
     figure.add_trace(basePlot)
-    figure.add_trace(predictionPlot)
+    for plot in predictionPlots:
+        figure.add_trace(plot)
     figure.update_layout(autosize=False,
                          height=700,
                          width=1100,
                          title=ticker,
-                         showlegend=False,
+                         showlegend=True,
                          dragmode="pan")
 
     figure.update_xaxes(
@@ -141,8 +142,43 @@ def makeLineChart(x, y, line=None, name=None):
         The line format parameters
     name: str
         The name for the line
+
+    Returns
+    -------
+    plot: plotly.graph_objs
+        The graph plotted by plotly
     """
     plot = go.Scatter(x=x, y=y, line=line, name=name)
+    return plot
+
+
+def plotActions(x, y, action):
+    """Method to plot the actions of an agent
+
+    Parameters
+    ----------
+        x: numpy.array
+            The dates which has to be plotted
+        y: numpy.array
+            The actions
+        action: str
+            The actions to be plotted, either "buy"
+            or "sell"
+    Returns
+    -------
+    plot: plotly.graph_objs
+        The graph plotted by plotly
+    """
+    if action == "buy":
+        markerSymbol = 205
+        color = "green"
+    elif action == "sell":
+        markerSymbol = 206
+        color = "firebrick"
+    # plot = go.Scatter(x=x, y=y, mode="markers", marker_symbol=markerSymbol,
+    #                   marker_color=color, name=action, marker_size=15)
+    plot = go.Scatter(x=x, y=y, mode="markers",
+                      marker_color=color, name=action)
     return plot
 
 
@@ -187,3 +223,40 @@ def plotForecasterPrediction(data, predictions):
 
         allPredictionPlots.append(plot)
     return allPredictionPlots
+
+
+def plotAgentPrediction(data, predictions):
+    """Method to plot all the predictions
+
+    This method takes care of preserving the dates of the predictions.
+
+    Parameters
+    ----------
+    data: pandas.DataFrame
+        The raw ticker data
+    predictions: numpy.array
+        The model's output after being passed through
+        DataProcessor.outputProcessor()
+
+    Returns
+    -------
+    allPredictions: list
+        A list of all the plotly plot objects
+    """
+    buys, sells, holds = predictions
+    yBuy = []
+    ySell = []
+    # Do nothing for hold actions
+    for buy, sell, price in zip(buys[::-1], sells[::-1], data["Close"][::-1]):
+        if buy:
+            yBuy.append(price)
+            ySell.append(None)
+        elif sell:
+            ySell.append(price)
+            yBuy.append(None)
+        else:
+            ySell.append(None)
+            yBuy.append(None)
+    buyPlot = plotActions(data.index[-len(buys):], yBuy[::-1], "buy")
+    sellPlot = plotActions(data.index[-len(sells):], ySell[::-1], "sell")
+    return (buyPlot, sellPlot)

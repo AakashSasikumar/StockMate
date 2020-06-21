@@ -5,7 +5,7 @@ import numpy as np
 import tqdm
 import random
 
-tf.compat.v1.disable_eager_execution()
+# tf.compat.v1.disable_eager_execution()
 
 
 class BasicDQN(AgentBase):
@@ -169,6 +169,7 @@ class WaveNetDQN(AgentBase):
         model.add(keras.layers.LSTM(32, return_sequences=True))
         model.add(keras.layers.LSTM(32, return_sequences=True))
         model.add(keras.layers.Dense(1))
+        model.add(keras.layers.Dense(self.actionSize))
         if learningRate:
             optimizer = keras.optimizers.Adam(lr=learningRate)
         else:

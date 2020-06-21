@@ -18,7 +18,6 @@ def init():
     kerasLayers = getKerasLayers()
     allForecasters = initModelDetails(kerasLayers)
     allAgents = initModelDetails(kerasLayers, location="Models/Agents")
-    print(allAgents)
 
 
 def getKerasLayers():

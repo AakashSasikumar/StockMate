@@ -64,12 +64,9 @@ def getPlot():
     plotType = request.json["plotType"]
     numDays = request.json["numDays"]
     modelType = request.json["type"]
-    if modelType == "forecaster":
-        figure = urh.getForecasterPlot(modelLoc, ticker,
-                                       plotType, numDays)
-    elif modelType == "agent":
-        figure = urh.getAgentPlot(modelLoc, ticker,
-                                  plotType, numDays)
+    figure = urh.getForecasterPlot(modelLoc, ticker,
+                                   plotType, numDays,
+                                   modelType)
     return figure
 
 
