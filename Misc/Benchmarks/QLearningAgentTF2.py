@@ -129,7 +129,6 @@ class DQN:
                 nextState = self.dataset[timeStep-self.lookBack+1]
 
                 action = self.getAction(currentState.reshape(1, -1))
-                print(self.epsilon)
                 reward = self.getReward(action, currentPrice)
 
                 self.memory.append((currentState, action, reward, nextState))
