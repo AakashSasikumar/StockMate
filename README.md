@@ -104,27 +104,7 @@ The following models have been implemented,
 
 ### Setup
 
-#### 1. API Key(s)
-
-1. Create an api key on [AlphaVantage](https://www.alphavantage.co/support/#api-key)
-    - OPTIONAL: Create multiple additional api keys using alternate email addresses and temporary email generators. If multiple API keys are present, they can be rotated when retreiving large amounts of stock data as there are daily limits for each key.
-2. Create a file named `CONFIG.py` in the root location of the repository
-3. Create a variable for the api key, ie
-
-    ```python
-    ALPHA_VANTAGE_API_KEY = "your api key here"  # with the quotes
-    ```
-
-    - If additional api keys were made, make separate variables for each one and create a final variable as a list of all these api keys, ie
-
-    ```python
-    KEY1 = "apiKey1"
-    KEY2 = "apiKey2"
-    KEY3 = "apiKey3"
-    KEY_LIST = [KEY1, KEY2, KEY3]
-    ```
-
-4. Run `setup.py` to scrape and save the latest NSEIndices and its constituents
+TODO
 
 ### Saving Stock Data
 
