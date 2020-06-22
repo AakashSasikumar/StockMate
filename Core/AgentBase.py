@@ -1,8 +1,9 @@
-import numpy as np
 import os
 import pickle
 import dill
 from tensorflow import keras
+import datetime
+import json
 
 
 class AgentBase:
@@ -53,17 +54,54 @@ class AgentBase:
         action: int
             The action chosen by the model
         """
-        processedInput = self.dataProcessor.inputProcessor(state, None)
-        modelOut = self.model.predict(processedInput)
-        processedOutput = self.dataProcessor.outputProcessor(modelOut, None)
-        return np.argmax(processedOutput)
+        modelOut = self.model.predict(state)
+        action = self.dataProcessor.outputProcessor(modelOut, None)
+        return action
+
+    def getAllActions(self, data, context):
+        """Method to get the actions from the model for a list of days
+
+        This method is mainly used for the UI to get actions for a bunch of
+        days together.
+
+        Parameters
+        ----------
+        data: pandas.DataFrame
+            The dataframe of the ticker data for which we get actions
+        context: dict
+            The context under which the inferencing is to be done
+        Returns
+        -------
+        actions: list
+            A list of actions taken by the model
+        """
+        inputData = self.dataProcessor.inputProcessor(data, context)
+        buyActions = []
+        sellActions = []
+        holdActions = []
+        for i in range(len(inputData)):
+            modelOut = self.model(inputData[i])
+            action = self.dataProcessor.outputProcessor(modelOut, context)
+            if action == self.ACTION_BUY:
+                buyActions.append(1)
+                sellActions.append(0)
+                holdActions.append(0)
+            elif action == self.ACTION_SELL:
+                sellActions.append(1)
+                buyActions.append(0)
+                holdActions.append(0)
+            elif action == self.ACTION_HOLD:
+                holdActions.append(1)
+                buyActions.append(0)
+                sellActions.append(0)
+        return (buyActions, sellActions, holdActions)
 
     def handleAction(self, action, price):
         """Method to carry out additional tasks from model output
 
         This method is used to carry out any other background tasks that needs
-        to do done based on the action chosen by the model. Currently, this method
-        is to update the orderbook and keep a track of profits made.
+        to do done based on the action chosen by the model. Currently, this
+        method is to update the orderbook and keep a track of profits made.
 
         Parameters
         ----------
@@ -122,6 +160,12 @@ class AgentBase:
             The trained model
         5. dataProcessor
             The data processor used for this model
+        6. AgentInfo.json
+            A json file containing the following information
+                - Tickers and features used to train the model
+                - The datetime of saving
+            This file is used for the UI to quickly get model information
+            without having to load the dataProcessor
 
         Parameters
         ----------
@@ -160,6 +204,13 @@ class AgentBase:
                         include_optimizer=True)
         with open(savePath + "dataProcessor.dill", "wb+") as f:
             dill.dump(self.dataProcessor, f)
+
+        with open(savePath + "AgentInfo.json", "w+") as f:
+            writeJson = {}
+            writeJson["tickers"] = self.dataProcessor.tickers
+            writeJson["features"] = self.dataProcessor.features
+            writeJson["savedTime"] = str(datetime.datetime.now())[:-10]
+            json.dump(writeJson, f)
 
     def loadModel(self, name, savePath="DataStore/SavedModels/Agents/"):
         """Loads the specified model.

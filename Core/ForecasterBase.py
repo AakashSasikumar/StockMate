@@ -2,6 +2,8 @@ from tensorflow import keras
 import os
 import pickle
 import dill
+import datetime
+import json
 
 
 class RegressorBase():
@@ -16,6 +18,9 @@ class RegressorBase():
     dataProcessor: Core.DataProcessor
         The data processor for the model
     """
+    def __init__(self):
+        self.history = None
+
     def buildModel(self, learningRate=None):
         """Builds the model and sets the class attribute
 
@@ -106,6 +111,12 @@ class RegressorBase():
                         include_optimizer=True)
         with open(savePath + "dataProcessor.dill", "wb+") as f:
             dill.dump(self.dataProcessor, f)
+        with open(savePath + "ForecasterInfo.json", "w+") as f:
+            writeJson = {}
+            writeJson["tickers"] = self.dataProcessor.tickers
+            writeJson["features"] = self.dataProcessor.features
+            writeJson["savedTime"] = str(datetime.datetime.now())[:-10]
+            json.dump(writeJson, f)
 
     def loadModel(self, name, savePath="DataStore/SavedModels/Forecasters/"):
         """Loads the specified model.

@@ -5,7 +5,7 @@ import numpy as np
 import tqdm
 import random
 
-tf.compat.v1.disable_eager_execution()
+# tf.compat.v1.disable_eager_execution()
 
 
 class BasicDQN(AgentBase):
@@ -91,7 +91,7 @@ class BasicDQN(AgentBase):
 
             self.model.fit(X, Y)
             if self.epsilon > self.epsilonMin:
-                self.epsilonMin *= self.epsilonDecay
+                self.epsilon *= self.epsilonDecay
 
     def train(self, epochs=200, logFreq=1):
         self.trainData = self.dataProcessor.getTrainingData()
@@ -110,7 +110,7 @@ class BasicDQN(AgentBase):
                 if random.random() <= self.epsilon:
                     action = random.randrange(self.actionSize)
                 else:
-                    action = self.getAction(currentState.reshape(1, -1))
+                    action = self.getAction(currentState)
                 reward = self.getReward(action, currentPrice)
                 self.memory.append((currentState, action, reward, nextState))
                 self.updateWeights()
@@ -169,6 +169,7 @@ class WaveNetDQN(AgentBase):
         model.add(keras.layers.LSTM(32, return_sequences=True))
         model.add(keras.layers.LSTM(32, return_sequences=True))
         model.add(keras.layers.Dense(1))
+        model.add(keras.layers.Dense(self.actionSize))
         if learningRate:
             optimizer = keras.optimizers.Adam(lr=learningRate)
         else:
@@ -207,7 +208,7 @@ class WaveNetDQN(AgentBase):
 
             self.model.fit(X, Y)
             if self.epsilon > self.epsilonMin:
-                self.epsilonMin *= self.epsilonDecay
+                self.epsilon *= self.epsilonDecay
 
     def train(self, epochs=200, logFreq=1):
         self.trainData = self.dataProcessor.getTrainingData()
@@ -226,7 +227,7 @@ class WaveNetDQN(AgentBase):
                 if random.random() <= self.epsilon:
                     action = random.randrange(self.actionSize)
                 else:
-                    action = self.getAction(currentState.reshape(1, -1))
+                    action = self.getAction(currentState)
                 reward = self.getReward(action, currentPrice)
                 self.memory.append((currentState, action, reward, nextState))
                 self.updateWeights()
@@ -236,3 +237,4 @@ class WaveNetDQN(AgentBase):
                 self.history["profit"].append(self.profit)
                 self.history["total_money"].append(self.money)
                 print(logStr.format(epoch, epochs, self.profit, self.money))
+                print(self.epsilon)

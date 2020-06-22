@@ -26,7 +26,8 @@ def init():
 @app.route("/")
 def index():
     return render_template("index.html", title=websiteName,
-                           numForecasters=len(uint.getAllSavedForecasters()))
+                           numForecasters=len(uint.getAllSavedForecasters()),
+                           numAgents=len(uint.getAllSavedAgents()))
 
 
 @app.route("/myForecasters")
@@ -38,15 +39,22 @@ def myForecasters():
                            savedModels=uint.getAllSavedForecasters())
 
 
-@app.route("/viewForecaster", methods=["GET"])
+@app.route("/viewModel", methods=["GET"])
 def viewForecasters():
     modelLoc = request.args["selectedModel"]
-    tickers = urh.getTickers(modelLoc)
-    title = "{}-{}".format(websiteName, modelLoc.split("/")[-1])
-    return render_template("viewForecaster.html", title=title,
-                           modelName=modelLoc.split("/")[-1],
+    modelType = request.args["type"]
+    modelName = modelLoc.split("/")[-1]
+    if modelType == "agent":
+        tickers = uint.getAllSavedAgents()[modelName]["tickers"]
+    elif modelType == "forecaster":
+        tickers = uint.getAllSavedForecasters()[modelName]["tickers"]
+
+    title = "{}-{}".format(websiteName, modelName)
+    return render_template("viewModel.html", title=title,
+                           modelName=modelName,
                            modelLoc=modelLoc,
-                           tickers=tickers)
+                           tickers=tickers,
+                           modelType=modelType)
 
 
 @app.route("/getPlot", methods=["POST"])
@@ -55,8 +63,10 @@ def getPlot():
     modelLoc = request.json["modelLoc"]
     plotType = request.json["plotType"]
     numDays = request.json["numDays"]
-    figure = urh.getTickerPlot(modelLoc, ticker,
-                               plotType, numDays)
+    modelType = request.json["type"]
+    figure = urh.getForecasterPlot(modelLoc, ticker,
+                                   plotType, numDays,
+                                   modelType)
     return figure
 
 
@@ -84,7 +94,8 @@ def myAgents():
     pageName = "My Agents"
     title = "{}-{}".format(websiteName, pageName)
     return render_template("myAgents.html", title=title,
-                           pageName=pageName)
+                           pageName=pageName,
+                           savedModels=uint.getAllSavedAgents())
 
 
 @app.route("/createAgents")
@@ -92,6 +103,14 @@ def createAgents():
     pageName = "Create Agents"
     title = "{}-{}".format(websiteName, pageName)
     return render_template("createAgents.html", title=title, pageName=pageName)
+
+
+@app.route("/toggleAgentSubscription", methods=["POST"])
+def toggleAgentSubscription():
+    modelData = request.json
+    urh.toggleAgentSubscription(modelData)
+    return (json.dumps({'success': True}), 200,
+            {'ContentType': 'application/json'})
 
 
 @app.route("/subscriptions")
