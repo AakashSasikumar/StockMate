@@ -18,9 +18,9 @@ websiteName = "StockMate"
 
 def init():
     uint.init()
-    # if "telegramAPIData.json" in os.listdir():
-    #     tbot.init()
-    #     tbot.startListening()
+    if "telegramAPIData.json" in os.listdir():
+        tbot.init()
+        tbot.startListening()
 
 
 @app.route("/")
