@@ -27,7 +27,8 @@ def init():
 def index():
     return render_template("index.html", title=websiteName,
                            numForecasters=len(uint.getAllSavedForecasters()),
-                           numAgents=len(uint.getAllSavedAgents()))
+                           numAgents=len(uint.getAllSavedAgents()),
+                           numSubscriptions=uint.numSubscriptions)
 
 
 @app.route("/myForecasters")

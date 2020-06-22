@@ -12,12 +12,13 @@ def init():
 
     Retrieves all keras models and their parameters.
     """
-    global allForecasters, allAgents
+    global allForecasters, allAgents, numSubscriptions
 
     sys.path.append("/Users/aakashsasikumar/Documents/Code/Python/StockMate/")
     kerasLayers = getKerasLayers()
     allForecasters = initModelDetails(kerasLayers)
     allAgents = initModelDetails(kerasLayers, location="Models/Agents")
+    getAllSavedAgents()
 
 
 def getKerasLayers():
@@ -163,6 +164,8 @@ def getAllSavedForecasters(savePath="DataStore/SavedModels/Forecasters"):
 
 def getAllSavedAgents(savePath="DataStore/SavedModels/Agents"):
     skipList = [".DS_Store"]
+    global numSubscriptions
+    numSubscriptions = 0
     savedAgents = {}
     if not os.path.isdir(savePath):
         if not os.path.isdir("DataStore/SavedModels"):
@@ -193,6 +196,8 @@ def getAllSavedAgents(savePath="DataStore/SavedModels/Agents"):
                     savedAgents[agent]["subscribed"] = 0
                 else:
                     savedAgents[agent]["subscribed"] = modelInfo["subscribed"]
+                    if modelInfo["subscribed"] == 1:
+                        numSubscriptions += 1
     return savedAgents
 
 
