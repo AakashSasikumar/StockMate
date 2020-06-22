@@ -13,7 +13,7 @@ A python based tool to build agents and models for stock price forecasting and t
     - [Features](#Features)
     - [Planned Features](#Planned-Features)
 3. [Usage](#Usage)
-    - [Setup](#Setup)
+    - [Installation and Setup](#Installation-and-Setup)
     - [Saving Stock Data](#Saving-Stock-Data)
     - [Forecaster Creation](#Forecaster-Creation)
 
@@ -21,7 +21,7 @@ A python based tool to build agents and models for stock price forecasting and t
 
 ### Prerequisites
 
-1. plotly dash
+1. plotly
 2. selenium
 3. phantomjs driver
 4. tensorflow 2.0 or greater
@@ -71,10 +71,10 @@ Also, two DPFs have already been implemented for handing univariate and multivar
 
 Currently, the implemented features for StockMate include
 
-1. A framework for regression models
-2. A web UI for forecaster creation
+1. Frameworks for Forecaster and Agent creation
+2. Framework for stock data retrieval with proxy rotation
+3. A fully fledged web UI viewing models and managing agent subscriptions
     - I have no skills in making good UIs or websites; I shamelessly copied [an open source dashboard](https://github.com/BlackrockDigital/startbootstrap-sb-admin-2).
-3. A framework for up-to-date stock data retrieval
 4. A tool for updating NSE Indices
 
 The following models have been implemented,
@@ -90,47 +90,63 @@ The following models have been implemented,
 
 #### Agents
 
-1. TBA
+1. QLearning.BasicDQN
+2. QLearning.WaveNetDQN
 
 ### Planned Features
 
 1. Packaging this repo
-2. Agent building framework
-3. Fully fledged website to view and modify forecasters and agents
-4. More customization for forecasters in the UI
-5. Semi-trade-automation by means of a telegram chatbot
+2. Creating Agents through the UI
+3. Additional customization for viewing models in the UI
+4. Implementation of additional forecasters and agents
 
 ## Usage
 
-### Setup
+### Installation and Setup
 
-TODO
+It is recommended to use this repo inside a virtual environment. Make sure you are using **Python 3.5 or greater**.
+
+```bash
+pip install virtualenv
+python -m venv stockmate
+source stockmate/bin/activate
+```
+
+Installing all the python dependencies dependencies,
+
+```bash
+pip install plotly tensorflow lxml selenium flask python-telegram-bot
+```
 
 ### Saving Stock Data
 
 #### 1. Data retrieval for a single stock (TCS)
 
 ```python
-from DataStore.APIInterface import AlphaVantage
-import CONFIG
+from DataStore.APIInterface import YFinance
+import pandas as pd
 
 ticker = "TCS"
 
-source = AlphaVantage(CONFIG.KEY1)
+source = YFinance()
 
-data = source.getDailyAdjusted(ticker)
-# The data returned is a csv as a single string
-# In this case, we will create and write this data into a csv file.
-with open("DataStore/StockData/{}".format(ticker), "w+") as f:
-    f.write(data)
+oneDayInterval = source.getIntraDay(ticker)
+# The data returned is the entire historical data of TCS with 1 day interval
+oneMinuteInterval = source.getInterDay(ticker, "1m")
+# The data returned is the past 7 days of 1 minute interval
+fiveMinuteInterval = source.getInterDay(ticker, "5m")
+# The data returned is the past 60 days of 5 minute interval
+
+# All of the data returned are pandas dataframes
+
+# These limits on how far back it goes are set by the yahoo finance api
 ```
 
-#### 2. Data retrieval for an entire index
+#### 2. Saving ticker data for an entire index
 
 ```python
 from DataStore import Indices
-from DataStore.APIInterface import AlphaVantage
-import CONFIG
+from DataStore.APIInterface import YFinance
 
 # For category and index names, check the file saved by running the setup.py file
 category = "Broad Market Indices :"
@@ -140,16 +156,14 @@ nse = Indices.NSEIndices()
 indices = nse.getIndices()
 
 # for a single api key
-source = AlphaVantage(CONFIG.KEY1)
-
-# for multiple api keys
-source = AlphaVantage(CONFIG.KEY_LIST, autoRotate=True)
+source = YFinance(autoRotate=True)
 
 constituents = indices["type"][category][index]
 
 for stock in constituents:
-    with open("{}.csv".format(stock), "w+") as f:
-        f.write(source.getDailyAdjusted(stock))
+    source.saveIntraDay(stock, savePath="DataStore/StockData/)
+
+# The above method saved the stock data in that location directly
 ```
 
 - AutoRotate is a feature that takes a list of api keys and rotates them so that the daily limit can be breached. It also scrapes a list of proxy addresses so that AlphaVantage doesn't block the source IP.
