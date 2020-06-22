@@ -134,6 +134,11 @@ def getAllIndicesAndConstituents():
 def getAllSavedForecasters(savePath="DataStore/SavedModels/Forecasters"):
     savedModels = {}
     skipList = [".DS_Store"]
+    if not os.path.isdir(savePath):
+        if not os.path.isdir("DataStore/SavedModels"):
+            os.mkdir("DataStore/SavedModels")
+        os.mkdir(savePath)
+        return savedModels
     for folder in os.listdir(savePath):
         template = "{}/{}"
         folderPath = template.format(savePath, folder)
@@ -159,6 +164,11 @@ def getAllSavedForecasters(savePath="DataStore/SavedModels/Forecasters"):
 def getAllSavedAgents(savePath="DataStore/SavedModels/Agents"):
     skipList = [".DS_Store"]
     savedAgents = {}
+    if not os.path.isdir(savePath):
+        if not os.path.isdir("DataStore/SavedModels"):
+            os.mkdir("DataStore/SavedModels")
+        os.mkdir(savePath)
+        return savedAgents
     for folder in os.listdir(savePath):
         template = "{}/{}"
         folderPath = template.format(savePath, folder)
