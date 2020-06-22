@@ -309,10 +309,10 @@ def getForecasterPlot(modelLoc, ticker, plotType, numDays, modelType):
     elif modelType == "agent":
         predictions = model.getAllActions(reqData, context)
     if modelType == "forecaster":
-        targetFeature = model.dataProcessor.allFeatures[model.dataProcessor.yInd]
+        targetFeature = model.dataProcessor.features[model.dataProcessor.yInd]
         figure = plot.getForecasterPredictionFigure(ticker, allData,
                                                     predictions,
-                                                    targetFeature.capitalize(),
+                                                    targetFeature,
                                                     plotType)
     elif modelType == "agent":
         figure = plot.getAgentPredictionFigure(ticker, allData, predictions,

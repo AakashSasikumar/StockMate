@@ -131,8 +131,8 @@
                   <div id="featureSelector" style="display: none;">
                     <input id="selectedFeatures"></input>
                   </div>
-                  <div id="targetFeatureDiv" style="display: none;">
-                    <label for="targetFeature">Target Feature</label>
+                  <div id="targetFeatureDiv">
+                    <label for="targetFeature" style="width: 120px;">Target Feature</label>
                     <select id="targetFeature" class="form-control2 bg-light border-0 small">
                       {% for featureName in allFeatures %}
                       <option value="{{featureName}}">{{featureName}}</option>

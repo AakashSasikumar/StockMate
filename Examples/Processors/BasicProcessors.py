@@ -150,7 +150,10 @@ class MultiVarProcessor(DataProcessor):
             return ds
 
     def outputProcessor(self, modelOut, context):
-        return modelOut
+        nOut = np.zeros(shape=(len(modelOut), self.forecast))
+        for i, row in enumerate(modelOut):
+            nOut[i] = row[-self.forecast:].reshape(-self.forecast,)
+        return nOut
 
     def convertToWindows(self, data, isTrain):
         """Converts the input data to a windowed dataset
