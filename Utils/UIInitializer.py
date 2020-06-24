@@ -71,14 +71,14 @@ def initModelDetails(kerasLayers, location="Models/Forecasters",
 
                     allModels[forecasterName] = {}
                     allModels[forecasterName]["description"] = \
-                        getForecasterDescription(forecaster[1].__doc__)
+                        getModelDescription(forecaster[1].__doc__)
                     allModels[forecasterName]["params"] = \
-                        getForecasterParams(forecaster[1].__doc__)
+                        getModelParams(forecaster[1].__doc__)
                     allModels[forecasterName]["moduleLoc"] = moduleLoc
     return allModels
 
 
-def getForecasterDescription(docString):
+def getModelDescription(docString):
     """Method to parse the multiline description of the model
 
     Parameters
@@ -91,12 +91,17 @@ def getForecasterDescription(docString):
     description: str
         A concise description of the model
     """
-    descriptionRaw = docString.split("\n\n")[1]
+    if len(docString) == 0:
+        return ""
+    descriptionRaw = docString.split("\n\n")
+    if len(descriptionRaw) == 0:
+        return ""
+    descriptionRaw = descriptionRaw[1]
     descriptionLines = [line.strip() for line in descriptionRaw.splitlines()]
     return " ".join(descriptionLines)
 
 
-def getForecasterParams(docString, skipList=["model"]):
+def getModelParams(docString, skipList=["model"]):
     """Method to parse the parameters of the model
 
     This method uses the documentation convention of this project
@@ -114,7 +119,12 @@ def getForecasterParams(docString, skipList=["model"]):
     params: list
         A list of all params required by the model
     """
-    paramsRaw = docString.split("\n\n")[-1]
+    if len(docString) == 0:
+        return []
+    paramsRaw = docString.split("\n\n")
+    if len(paramsRaw) == 0:
+        return []
+    paramsRaw = paramsRaw[-1]
     params = []
     for line in paramsRaw.splitlines():
         if ":" in line:

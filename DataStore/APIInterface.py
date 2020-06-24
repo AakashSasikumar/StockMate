@@ -25,7 +25,7 @@ class YFinance():
     proxyList: list
         A list of proxy addresses
     """
-    def __init__(self, autoRotate=True, exchange="NSE"):
+    def __init__(self, autoRotate=False, exchange="NSE"):
         self.autoRotate = autoRotate
 
         if exchange == "NSE":
@@ -118,7 +118,8 @@ class YFinance():
             try:
                 data = tickerObj.history(proxy=proxy, **arguments)
                 break
-            except Exception:
+            except Exception as e:
+                print(e)
                 self.proxyList.remove(proxy)
                 proxy = random.choice(self.proxyList)
         return data
@@ -156,17 +157,20 @@ class YFinance():
         if not os.path.isdir(savePath):
             os.mkdir(savePath)
         data = self.getInterDay(ticker, interval)
+        data.index.names = ["Date"]
         savePath = savePath + "/{}.csv".format(ticker)
         if os.path.isfile(savePath):
             # append to existing file
-            oldData = pd.read_csv(savePath, index_col="Datetime",
-                                  parse_dates=["Datetime"])
+            oldData = pd.read_csv(savePath, index_col="Date",
+                                  parse_dates=["Date"])
             oldData = oldData.sort_index(ascending=True)
             data = data[data.index > oldData.index[-1]]
+            data = pd.concat([oldData, data])
+
         data.to_csv(savePath)
 
     def getProxies(self, num=20):
-        """Method to scrape the list of valid proxies
+        """Method to scrape/load the list of valid proxies
 
         Parameters
         ----------
@@ -179,6 +183,12 @@ class YFinance():
             A list of all proxy addresses
         """
         proxyList = []
+        # if "proxies.txt" in os.listdir():
+        #     with open("proxies.txt") as f:
+        #         lines = f.readlines()
+        #         for line in lines:
+        #             proxyList.append(line.strip())
+        #     return proxyList
         url = 'https://free-proxy-list.net/'
         response = requests.get(url)
         parser = fromstring(response.text)

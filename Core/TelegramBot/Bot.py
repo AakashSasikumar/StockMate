@@ -1,4 +1,5 @@
 import json
+import telegram
 from telegram.ext import Updater, CommandHandler, MessageHandler
 import warnings
 from Core.TelegramBot.CustomFilters import RetrainReplyFilter
@@ -107,15 +108,23 @@ def saveRoot(chatID):
         json.dump(apiData, f)
 
 
-def sendMessage(message):
+def sendMessage(message, parseMode="html"):
     """A method to send any message to the root
 
     Parameters
     ----------
     message: str
         The message to be sent to the root
+    parseMode: str, optional
+        Value to determine whether the message should be
+        parsed as a HTML or as Markdown
     """
-    updater.bot.send_message(chat_id=root, text=message)
+    if parseMode.lower() == "html":
+        parser = telegram.ParseMode.HTML
+    elif parseMode.lower() == "markdown":
+        parser = telegram.ParseMode.MARKDOWN_V2
+    updater.bot.send_message(chat_id=root, text=message,
+                             parse_mode=parser)
 
 
 def resetRoot():

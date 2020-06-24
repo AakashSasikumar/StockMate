@@ -16,3 +16,5 @@ Models/ModelInfo.json
 stockmate
 StockDataRetreiver.py
 telegramAPIData.json
+proxies.txt
+JobStore

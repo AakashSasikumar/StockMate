@@ -260,19 +260,21 @@ class DQNProcessor(DataProcessor):
     """
     def __init__(self, tickers, features, lookBack):
         super().__init__(tickers, features)
-        self.lookBack = lookBack
+        self.lookBack = lookBack+1
 
     def inputProcessor(self, data, context):
         data = data.diff(1).dropna().values.reshape(len(data)-1)
+        if len(data) == self.lookBack-1:
+            return data.reshape(1, 1, self.lookBack-1)
         shape = data.shape[:-1] + \
-            (data.shape[-1] - self.lookBack + 1, self.lookBack)
+            (data.shape[-1] - self.lookBack, self.lookBack-1)
         strides = data.strides + (data.strides[-1],)
         windowedData = np.lib.stride_tricks.as_strided(data, shape=shape,
                                                        strides=strides)
         # use below for for BasicDQN
-        # return windowedData.reshape(len(windowedData), 1, self.lookBack)
+        return windowedData.reshape(len(windowedData), 1, self.lookBack-1)
         # use below for WaveNetDQN
-        return windowedData.reshape(len(windowedData), 1, self.lookBack, -1)
+        # return windowedData.reshape(len(windowedData), 1, self.lookBack-1, -1)
 
     def outputProcessor(self, modelOut, context):
         return np.argmax(modelOut)

@@ -8,6 +8,7 @@ from Utils import RequestHandler as urh
 import Core.TelegramBot.Bot as tbot
 from threading import Thread
 import os
+from Core import Jobs as jobs
 
 
 app = Flask(__name__, template_folder="UI/templates",
@@ -21,6 +22,7 @@ def init():
     if "telegramAPIData.json" in os.listdir():
         tbot.init()
         tbot.startListening()
+    jobs.init()
 
 
 @app.route("/")
@@ -155,6 +157,6 @@ def pageNotFound(e):
 
 if __name__ == '__main__':
     init()
-    app.run(debug=True)
+    app.run(debug=False)
 else:
     init()
