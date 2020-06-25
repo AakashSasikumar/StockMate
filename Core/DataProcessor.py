@@ -32,8 +32,8 @@ class DataProcessor():
         self.features = features
         self.interval = interval.upper()
         self.initFeatures()
-        self.loadTickerData()
         self.apiSource = YFinance()
+        self.loadTickerData()
 
     def initFeatures(self):
         # TODO: Increase number of features
@@ -53,7 +53,7 @@ class DataProcessor():
         for ticker in self.tickers:
             path = "DataStore/StockData/{}/{}.csv".format(self.interval,
                                                           ticker)
-            if not os.path.isfile():
+            if not os.path.isfile(path):
                 self.downloadData(ticker)
             data = pd.read_csv(path, index_col="Date", parse_dates=["Date"])
 

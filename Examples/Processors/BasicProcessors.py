@@ -24,8 +24,9 @@ class UniVarProcessor(DataProcessor):
         A dictionary containing all the ticker data
     """
 
-    def __init__(self, tickers, features, lookBack, forecast, isSeq2Seq=False):
-        super().__init__(tickers, features)
+    def __init__(self, tickers, features, lookBack, forecast,
+                 interval, isSeq2Seq=False):
+        super().__init__(tickers, features, interval)
 
         self.lookBack = lookBack
         self.forecast = forecast
@@ -128,8 +129,8 @@ class MultiVarProcessor(DataProcessor):
     """
 
     def __init__(self, tickers, features, lookBack, forecast,
-                 targetFeature, isSeq2Seq=False):
-        super().__init__(tickers, features)
+                 targetFeature, interval, isSeq2Seq=False):
+        super().__init__(tickers, features, interval)
 
         self.lookBack = lookBack
         self.forecast = forecast
@@ -192,8 +193,8 @@ class MultiVarProcessor(DataProcessor):
 
 class testProcessor(DataProcessor):
     def __init__(self, tickers, features, lookBack, forecast,
-                 targetFeature, isSeq2Seq=False):
-        super().__init__(tickers, features)
+                 targetFeature, interval, isSeq2Seq=False):
+        super().__init__(tickers, features, interval)
 
         self.lookBack = lookBack
         self.forecast = forecast
@@ -258,8 +259,8 @@ class DQNProcessor(DataProcessor):
     This DPF supports QLearning.BasicDQN and QLearning.WaveNetDQN.
 
     """
-    def __init__(self, tickers, features, lookBack):
-        super().__init__(tickers, features)
+    def __init__(self, tickers, features, lookBack, interval):
+        super().__init__(tickers, features, interval)
         self.lookBack = lookBack+1
 
     def inputProcessor(self, data, context):
