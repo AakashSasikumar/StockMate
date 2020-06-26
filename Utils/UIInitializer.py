@@ -12,12 +12,13 @@ def init():
 
     Retrieves all keras models and their parameters.
     """
-    global allForecasters, allAgents
+    global allForecasters, allAgents, numSubscriptions
 
     sys.path.append("/Users/aakashsasikumar/Documents/Code/Python/StockMate/")
     kerasLayers = getKerasLayers()
     allForecasters = initModelDetails(kerasLayers)
     allAgents = initModelDetails(kerasLayers, location="Models/Agents")
+    getAllSavedAgents()
 
 
 def getKerasLayers():
@@ -70,14 +71,14 @@ def initModelDetails(kerasLayers, location="Models/Forecasters",
 
                     allModels[forecasterName] = {}
                     allModels[forecasterName]["description"] = \
-                        getForecasterDescription(forecaster[1].__doc__)
+                        getModelDescription(forecaster[1].__doc__)
                     allModels[forecasterName]["params"] = \
-                        getForecasterParams(forecaster[1].__doc__)
+                        getModelParams(forecaster[1].__doc__)
                     allModels[forecasterName]["moduleLoc"] = moduleLoc
     return allModels
 
 
-def getForecasterDescription(docString):
+def getModelDescription(docString):
     """Method to parse the multiline description of the model
 
     Parameters
@@ -90,12 +91,17 @@ def getForecasterDescription(docString):
     description: str
         A concise description of the model
     """
-    descriptionRaw = docString.split("\n\n")[1]
+    if len(docString) == 0:
+        return ""
+    descriptionRaw = docString.split("\n\n")
+    if len(descriptionRaw) == 0:
+        return ""
+    descriptionRaw = descriptionRaw[1]
     descriptionLines = [line.strip() for line in descriptionRaw.splitlines()]
     return " ".join(descriptionLines)
 
 
-def getForecasterParams(docString, skipList=["model"]):
+def getModelParams(docString, skipList=["model"]):
     """Method to parse the parameters of the model
 
     This method uses the documentation convention of this project
@@ -113,7 +119,12 @@ def getForecasterParams(docString, skipList=["model"]):
     params: list
         A list of all params required by the model
     """
-    paramsRaw = docString.split("\n\n")[-1]
+    if len(docString) == 0:
+        return []
+    paramsRaw = docString.split("\n\n")
+    if len(paramsRaw) == 0:
+        return []
+    paramsRaw = paramsRaw[-1]
     params = []
     for line in paramsRaw.splitlines():
         if ":" in line:
@@ -163,6 +174,8 @@ def getAllSavedForecasters(savePath="DataStore/SavedModels/Forecasters"):
 
 def getAllSavedAgents(savePath="DataStore/SavedModels/Agents"):
     skipList = [".DS_Store"]
+    global numSubscriptions
+    numSubscriptions = 0
     savedAgents = {}
     if not os.path.isdir(savePath):
         if not os.path.isdir("DataStore/SavedModels"):
@@ -193,6 +206,8 @@ def getAllSavedAgents(savePath="DataStore/SavedModels/Agents"):
                     savedAgents[agent]["subscribed"] = 0
                 else:
                     savedAgents[agent]["subscribed"] = modelInfo["subscribed"]
+                    if modelInfo["subscribed"] == 1:
+                        numSubscriptions += 1
     return savedAgents
 
 
@@ -203,10 +218,10 @@ def getAllFeatures():
 
 
 def getTelegramAPIKey():
-    if "telegramAPIData.json" not in os.listdir():
+    if "telegramAPIData.json" not in os.listdir("DataStore/Configs/"):
         return False
     else:
-        with open("telegramAPIData.json") as f:
+        with open("DataStore/Configs/telegramAPIData.json") as f:
             return json.load(f)["apiKey"]
 
 

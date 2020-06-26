@@ -1,5 +1,7 @@
 import pandas as pd
 import math
+import os
+from DataStore.APIInterface import YFinance
 
 
 class DataProcessor():
@@ -17,13 +19,20 @@ class DataProcessor():
         A list of features needed for each ticker
     tickerData: dict
         A dictionary containing the pandas DataFrame for each ticker
+    interval: str
+        Parameter specifying the data interval to be fetched and trained on
+    apiSource: DataStore.APIInterface
+        An object of the API interface. The source from where the data is to
+        be download if not present already
 
     """
 
-    def __init__(self, tickers, features):
+    def __init__(self, tickers, features, interval):
         self.tickers = tickers
         self.features = features
+        self.interval = interval.upper()
         self.initFeatures()
+        self.apiSource = YFinance()
         self.loadTickerData()
 
     def initFeatures(self):
@@ -42,12 +51,21 @@ class DataProcessor():
         """
         self.tickerData = {}
         for ticker in self.tickers:
-            data = pd.read_csv("DataStore/StockData/{}.csv".format(ticker),
-                               index_col="Date", parse_dates=["Date"])
+            path = "DataStore/StockData/{}/{}.csv".format(self.interval,
+                                                          ticker)
+            if not os.path.isfile(path):
+                self.downloadData(ticker)
+            data = pd.read_csv(path, index_col="Date", parse_dates=["Date"])
 
             data = data.sort_index(ascending=True)
             data = self.getFeatures(data)
             self.tickerData[ticker] = data
+
+    def downloadData(self, ticker):
+        if "D" in self.interval:
+            self.apiSource.saveIntraDay(ticker)
+        elif "M" in self.interval:
+            self.apiSource.saveInterDay(ticker, self.interval.lower())
 
     def getTickerData(self):
         """Returns the ticker data
@@ -83,7 +101,7 @@ class DataProcessor():
     def getColumnName(self, data, feature):
         """Method to get proper column name from dataframe
 
-        This method is to make the feature names capitalization agnostic.
+        This method is to make the feature names case insensitive.
         If the Open feature were specified as OpEn, this method would match
         the correct column name from the dataframe and return it. As long as
         the spelling is the same, capitalization doesn't matter.

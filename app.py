@@ -8,6 +8,7 @@ from Utils import RequestHandler as urh
 import Core.TelegramBot.Bot as tbot
 from threading import Thread
 import os
+from Core import Jobs as jobs
 
 
 app = Flask(__name__, template_folder="UI/templates",
@@ -18,16 +19,18 @@ websiteName = "StockMate"
 
 def init():
     uint.init()
-    if "telegramAPIData.json" in os.listdir():
+    if "telegramAPIData.json" in os.listdir("DataStore/Configs/"):
         tbot.init()
         tbot.startListening()
+    jobs.init()
 
 
 @app.route("/")
 def index():
     return render_template("index.html", title=websiteName,
                            numForecasters=len(uint.getAllSavedForecasters()),
-                           numAgents=len(uint.getAllSavedAgents()))
+                           numAgents=len(uint.getAllSavedAgents()),
+                           numSubscriptions=uint.numSubscriptions)
 
 
 @app.route("/myForecasters")
@@ -154,6 +157,6 @@ def pageNotFound(e):
 
 if __name__ == '__main__':
     init()
-    app.run(debug=True)
+    app.run(debug=False)
 else:
     init()

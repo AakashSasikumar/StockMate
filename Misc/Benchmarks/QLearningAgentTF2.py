@@ -9,8 +9,6 @@ import tqdm
 import yfinance as yf
 
 
-tf.compat.v1.disable_eager_execution()
-
 ticker = "INDUSINDBK"
 df_full = yf.Ticker("{}.NS".format(ticker)).history("max").reset_index()
 # df_full = pd.read_csv("DataStore/StockData/{}.csv".format(ticker), index_col="timestamp")
@@ -86,7 +84,6 @@ class DQN:
         self.handleAction(action, currentPrice)
         return (self.money - self.initialMoney)/self.initialMoney
 
-    @tf.function
     def updateWeights(self):
         if len(self.memory) >= self.batchSize:
             endIndex = len(self.memory)
@@ -94,16 +91,16 @@ class DQN:
             batchData = []
             for i in range(startIndex, endIndex):
                 batchData.append(self.memory[i])
-            X = tf.zeros((self.batchSize, self.lookBack))
-            Y = tf.zeros((self.batchSize, self.actionSize))
-            states = tf.convert_to_tensor([item[0] for item in batchData])
-            newStates = tf.convert_to_tensor([item[3] for item in batchData])
+            X = np.zeros((self.batchSize, self.lookBack))
+            Y = np.zeros((self.batchSize, self.actionSize))
+            states = np.array([item[0] for item in batchData])
+            newStates = np.array([item[3] for item in batchData])
             # with tf.GradientTape() as tape:
             Q = self.model(states)
             QNext = self.model(newStates)
             for i in range(len(batchData)):
                 state, action, reward, nextState = batchData[i]
-                target = Q[i]
+                target = Q[i].numpy()
                 target[action] = reward
                 target[action] += self.gamma * np.max(QNext[i])
 
@@ -114,7 +111,7 @@ class DQN:
                 # self.optimizer.apply_gradients(zip(grads, self.model.trainable_weights))
                 # self.model.train_on_batch(X, Y)
                 # self.mode.fit(X, Y, use_multiprocessing=True)
-            self.model.fit(X, Y)
+            self.model.fit(X, Y, verbose=0)
             if self.epsilon > self.epsilonMin:
                 self.epsilon *= self.epsilonDecay
 

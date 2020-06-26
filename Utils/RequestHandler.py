@@ -9,6 +9,8 @@ import dill
 from Utils import Plotter as plot
 from Utils import UIInitializer as uint
 import pandas as pd
+from Core import Jobs as jobs
+from Core.Jobs import SubscriptionJob as sj
 
 
 def saveTelegramAPIKey(apiKey):
@@ -20,7 +22,7 @@ def saveTelegramAPIKey(apiKey):
         The telegram bot api key
     """
     saveDict = {"apiKey": apiKey}
-    with open("telegramAPIData.json", "w+") as f:
+    with open("DataStore/Configs/telegramAPIData.json", "w+") as f:
         json.dump(saveDict, f)
 
 
@@ -30,10 +32,10 @@ def resetTelegramRoot():
     This method will delete the chatID of the root user, so as
     to be able to reset it.
     """
-    if "telegramAPIData.json" not in os.listdir():
+    if "telegramAPIData.json" not in os.listdir("DataStore/Configs/"):
         return
 
-    with open("telegramAPIData.json") as f:
+    with open("DataStore/Configs/telegramAPIData.json") as f:
         apiData = json.load(f)
 
     if "rootID" not in apiData.keys():
@@ -41,7 +43,7 @@ def resetTelegramRoot():
 
     # only saves the apiKey, and effectively removing rootID
     saveTelegramAPIKey(apiData["apiKey"])
-    tbot.restRoot()
+    tbot.resetRoot()
 
 
 def createForecaster(modelData):
@@ -293,7 +295,7 @@ def getForecasterPlot(modelLoc, ticker, plotType, numDays, modelType):
         return {"error": message.format(numDays,
                                         model.dataProcessor.lookBack)}
 
-    allData = getTickerData(ticker)
+    allData = getTickerData(ticker, model.dataProcessor.interval)
     allData = model.dataProcessor.getFeatures(allData)
 
     if numDays == -1 or numDays >= len(allData):
@@ -320,7 +322,7 @@ def getForecasterPlot(modelLoc, ticker, plotType, numDays, modelType):
     return figure
 
 
-def getTickerData(ticker):
+def getTickerData(ticker, interval):
     """Method to retrieve the latest raw ticker
 
     Parameters
@@ -333,7 +335,8 @@ def getTickerData(ticker):
     df: pandas.DataFrame
         The raw data of the ticker
     """
-    df = pd.read_csv("DataStore/StockData/{}.csv".format(ticker),
+    df = pd.read_csv("DataStore/StockData/{}/{}.csv".format(interval.upper(),
+                                                            ticker),
                      index_col="Date", parse_dates=["Date"])
     df.sort_index(ascending=True)
     return df
@@ -354,9 +357,21 @@ def toggleAgentSubscription(modelData):
     if modelData["subscribe"]:
         # TODO: Implement subscribe methods
         agentInfo["subscribed"] = modelData["subscribe"]
+        job = sj(modelData["agentName"], modelData["savePath"])
+        job.save()
+        job.scheduleJob()
+        message = ("Successfully subscribed"
+                   " to {}").format(modelData["agentName"])
+        tbot.sendMessage(message)
     else:
         # TODO: Implement unsubscribe methods
         agentInfo["subscribed"] = modelData["subscribe"]
+        baseClass = modelData["savePath"].split("/")[-2]
+        subscriptionName = "{}.{}".format(baseClass, modelData["agentName"])
+        jobs.deleteSubscription(subscriptionName)
+        message = ("Successfully unsubscribed"
+                   " from {}").format(modelData["agentName"])
+        tbot.sendMessage(message)
 
     with open(template.format(modelData["savePath"], "AgentInfo.json"), "w+") as f:
         json.dump(agentInfo, f)

@@ -1,4 +1,5 @@
 import json
+import telegram
 from telegram.ext import Updater, CommandHandler, MessageHandler
 import warnings
 from Core.TelegramBot.CustomFilters import RetrainReplyFilter
@@ -13,7 +14,7 @@ def init():
     """
     global root, updater, apiData
 
-    with open("telegramAPIData.json") as f:
+    with open("DataStore/Configs/telegramAPIData.json") as f:
         apiData = json.load(f)
 
     updater = Updater(apiData["apiKey"], use_context=True)
@@ -60,8 +61,8 @@ def start(update, context):
     elif chatID == root:
         suffix = ("If you have subscribed to any trading agents, "
                   "I will send you updates on when to buy and sell."
-                  "Also, I will give you updates on any train jobs"
-                  "you may have set")
+                  " Also, I will give you updates on any train jobs"
+                  " you may have set")
     elif chatID != root:
         suffix = ("Looks like you are not the root user. If you want"
                   " to become root, click on the reset root button on"
@@ -102,20 +103,28 @@ def saveRoot(chatID):
     global root
     root = chatID
 
-    with open("telegramAPIData.json", "w+") as f:
+    with open("DataStore/Configs/telegramAPIData.json", "w+") as f:
         apiData["rootID"] = chatID
         json.dump(apiData, f)
 
 
-def sendMessage(message):
+def sendMessage(message, parseMode="html"):
     """A method to send any message to the root
 
     Parameters
     ----------
     message: str
         The message to be sent to the root
+    parseMode: str, optional
+        Value to determine whether the message should be
+        parsed as a HTML or as Markdown
     """
-    updater.bot.send_message(chat_id=root, text=message)
+    if parseMode.lower() == "html":
+        parser = telegram.ParseMode.HTML
+    elif parseMode.lower() == "markdown":
+        parser = telegram.ParseMode.MARKDOWN_V2
+    updater.bot.send_message(chat_id=root, text=message,
+                             parse_mode=parser)
 
 
 def resetRoot():
@@ -126,8 +135,8 @@ def resetRoot():
     executed.
     """
     global root
-    root = None
     sendMessage("Root has been reset. You are not the root anymore")
+    root = None
 
 
 def retrainLastModel(update, context):

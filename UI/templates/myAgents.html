@@ -86,13 +86,13 @@
                             <td>{{savedModels[agent]["tickers"]|length}}</td>
                             <td>{{savedModels[agent]["features"]|length}}</td>
                             {% if savedModels[agent]["subscribed"] %}
-                              <td><input id="{{agent}}" type="checkbox" onclick="subscribeAgentToggle(this, {{savedModels}})"></td>
+                              <td><input id="{{agent}}" type="checkbox" onclick="subscribeAgentToggle(this, '{{agent}}', {{savedModels[agent]}})"></td>
                               <script>
                                 var agent = document.getElementById("{{agent}}");
                                 agent.checked = true;
                               </script>
                             {% else %}
-                              <td><input type="checkbox" onclick="subscribeAgentToggle(this, {{savedModels}})"></td>
+                              <td><input type="checkbox" onclick="subscribeAgentToggle(this, '{{agent}}', {{savedModels[agent]}})"></td>
                             {% endif %}
                           </tr>
                         {% endfor %}
