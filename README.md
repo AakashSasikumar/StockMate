@@ -11,7 +11,7 @@ A python based tool to build agents and models for stock price forecasting and t
     - [UI](#UI)
     - [Frameworks](#Frameworks)
     - [Planned Features](#Planned-Features)
-    - [WTF? TF1 and TF2 Together?](#WTF?-TF1-and-TF2-Together)
+    - [WTF? TF1 and TF2 Together?](#WTF-TF1-and-TF2-Together)
 2. [Usage](#Usage)
     - [Installation and Setup](#Installation-and-Setup)
     - [Saving Stock Data](#Saving-Stock-Data)
