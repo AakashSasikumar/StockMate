@@ -273,9 +273,10 @@ class DQNProcessor(DataProcessor):
         windowedData = np.lib.stride_tricks.as_strided(data, shape=shape,
                                                        strides=strides)
         # use below for for BasicDQN
-        return windowedData.reshape(len(windowedData), 1, self.lookBack-1)
-        # use below for WaveNetDQN
-        # return windowedData.reshape(len(windowedData), 1, self.lookBack-1, -1)
+        if len(windowedData) == 1:
+            return windowedData.reshape(1, self.lookBack-1)
+        else:
+            return windowedData
 
     def outputProcessor(self, modelOut, context):
         return np.argmax(modelOut)

@@ -157,8 +157,8 @@ class SubscriptionJob():
         if "d" in self.interval:
             # in terms of days
             numDays = int(self.interval[:-1])
-            # schedule.every(numDays).day.at("15:15").do(self.task).tag(self.name)
-            schedule.every(5).seconds.do(self.task).tag(self.name)
+            schedule.every(numDays).day.at("15:15").do(self.task).tag(self.name)
+            # schedule.every(5).seconds.do(self.task).tag(self.name)
         elif "m" in self.interval:
             # in terms of minutes
             numMinutes = int(self.interval[:-1])

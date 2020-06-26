@@ -4,7 +4,8 @@ import random
 import tqdm
 import yfinance as yf
 
-tf.disable_v2_behavior()
+# tf.disable_v2_behavior()
+tf.compat.v1.disable_eager_execution()
 tf.set_random_seed(1997)
 
 ticker = "INDUSINDBK"

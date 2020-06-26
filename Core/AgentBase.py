@@ -1,15 +1,45 @@
 import os
 import pickle
 import dill
-from tensorflow import keras
+import tensorflow.compat.v1 as tf
 import datetime
 import json
 
 
 class AgentBase:
+    """The base class for all agents
+
+    All agents created must have a name their model's output layer
+    `modelOutput`.
+
+    Attributes
+    ----------
+    dataProcessor: DataProcessor()
+        The dataprocessor assigned to this model
+    orderBook: list
+        The list of actions that were taken by the user.
+        This is used to keep track of the money remaning
+    initialMoney: int
+        The initial money given to the agent
+    profit: int
+        A temporary variable used for the train function
+    money: int
+        A temporary variable used to keep track of money remaining
+    history: dict
+        An attribute that keeps track of all the metrics logged during training
+    lookBack: int
+        The number of days to look back to make a decision
+    tickerData: list
+        The list of all tickers this agent was trained on
+    allActions: list
+        A list of all actions possible for agents
+    actionSize: int
+        The number of unique actions that can be taken
+
+    """
     def __init__(self, initialMoney):
         self.dataProcessor = None
-        self.actions = self.initActions()
+        self.initActions()
 
         self.orderBook = []
         self.initialMoney = initialMoney
@@ -38,7 +68,7 @@ class AgentBase:
         self.allActions = [self.ACTION_BUY, self.ACTION_SELL, self.ACTION_HOLD]
         self.actionSize = len(self.allActions)
 
-    def getAction(self, state):
+    def getAction(self, state, context=None):
         """Method to get the action from the model given the current state
 
         This method uses the specified dataProcessor to get the proper action
@@ -48,13 +78,17 @@ class AgentBase:
         ----------
         state: numpy.array
             The representation of the current state
+        context: dict
+            The context under which this action is to be taken
 
         Returns
         -------
         action: int
             The action chosen by the model
         """
-        modelOut = self.model.predict(state)
+
+        modelOut = self.session.run(self.modelOutput,
+                                    feed_dict={self.input: state})
         action = self.dataProcessor.outputProcessor(modelOut, None)
         return action
 
@@ -80,8 +114,7 @@ class AgentBase:
         sellActions = []
         holdActions = []
         for i in range(len(inputData)):
-            modelOut = self.model(inputData[i])
-            action = self.dataProcessor.outputProcessor(modelOut, context)
+            action = self.getAction(inputData[i], context)
             if action == self.ACTION_BUY:
                 buyActions.append(1)
                 sellActions.append(0)
@@ -147,20 +180,11 @@ class AgentBase:
         the specified location.
 
         This method saves the following things:
-        1. modelSummary.txt
-            A text file containing information about the model such as
-            the layer wise parameters and total parameters that were trained
-        2. history.pickle
-            A pickle file containing the log of metrics while training the
-            model.
-        3. modelConfig.json
-            This file contains the model configuration. This can be used
-            later to replicate the model without the trained parameters
-        4. model
+        1. model
             The trained model
-        5. dataProcessor
+        2. dataProcessor
             The data processor used for this model
-        6. AgentInfo.json
+        3. AgentInfo.json
             A json file containing the following information
                 - Tickers and features used to train the model
                 - The datetime of saving
@@ -192,18 +216,13 @@ class AgentBase:
             os.mkdir(modelPath)
 
         savePath = modelPath
-        with open(savePath + "modelSummary.txt", "w+") as f:
-            self.model.summary(print_fn=lambda x: f.write(x + '\n'))
-
-        with open(savePath + "modelConfig.json", "w+") as f:
-            f.write(self.model.to_json())
+        saver = tf.train.Saver()
+        saver.save(self.session, savePath + "model/model.ckpt")
+        with open(savePath + "dataProcessor.dill", "wb+") as f:
+            dill.dump(self.dataProcessor, f)
         if self.history:
             with open(savePath + "history.pickle", "wb+") as f:
                 pickle.dump(self.history, f)
-        self.model.save(savePath + "model", save_format="tf",
-                        include_optimizer=True)
-        with open(savePath + "dataProcessor.dill", "wb+") as f:
-            dill.dump(self.dataProcessor, f)
 
         with open(savePath + "AgentInfo.json", "w+") as f:
             writeJson = {}
@@ -234,12 +253,14 @@ class AgentBase:
             raise Exception(message)
         savePath = modelPath
         savePath = "{}/{}".format(savePath, name)
-        model, dp = AgentBase.loadAll(savePath)
-        self.model = model
-        self.dataProcessor = dp
+        dp = self.loadDP(savePath)
+        self.assignDataProcessor(dp)
+        self.buildModel()
+        saver = tf.train.Saver()
+        saver.restore(self.session, savePath+"/model/model.ckpt")
 
-    def loadAll(path):
-        """Loads the specified model
+    def loadDP(self, path):
+        """Loads the model's data processor
 
         This method loads the model and other attributes when the
         correct path is passed.
@@ -248,8 +269,12 @@ class AgentBase:
         ----------
         path: str
             The path of the model
+
+        Returns
+        -------
+        dataProcessor: DataProcessor()
+            The data processor that was used for this model
         """
-        model = keras.models.load_model(path+"/model")
         with open(path + "/dataProcessor.dill", "rb") as f:
             dataProcessor = dill.load(f)
-        return model, dataProcessor
+        return dataProcessor
