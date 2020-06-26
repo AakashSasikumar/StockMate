@@ -166,7 +166,7 @@ class DQN:
 def trainAgent():
     test = DQN()
     test.assignModel(model)
-    test.train(2)
+    test.train(1)
 
 
 if __name__ == "__main__":

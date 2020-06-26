@@ -140,7 +140,7 @@ def trainAgent():
     test = DQN(data)
     test.createDataset()
     test.buildModel()
-    test.train(2)
+    test.train(1)
 
 
 if __name__ == "__main__":

@@ -1,7 +1,7 @@
 import time
 import subprocess
 
-rootLoc = "Utils/BenchmarkTests"
+rootLoc = "Misc/Benchmarks"
 benchmarks = ["QLearningAgentTF1.py", "QLearningAgentTF2.py",
               "QLearningAgentPyTorch.py"]
 

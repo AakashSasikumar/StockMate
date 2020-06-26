@@ -11,6 +11,7 @@ A python based tool to build agents and models for stock price forecasting and t
     - [UI](#UI)
     - [Frameworks](#Frameworks)
     - [Planned Features](#Planned-Features)
+    - [WTF? TF1 and TF2 Together?](#WTF?-TF1-and-TF2-Together?)
 2. [Usage](#Usage)
     - [Installation and Setup](#Installation-and-Setup)
     - [Saving Stock Data](#Saving-Stock-Data)
@@ -101,6 +102,20 @@ The following models have been implemented,
 2. Creating Agents through the UI
 3. Additional customization for viewing models in the UI
 4. Implementation of additional forecasters and agents
+
+### WTF? TF1 and TF2 Together?
+
+Well yes. The Forecasters use TF2 and Agents use TF1. I tried implementing RL algorithms in TF2, but for the sake of easier coding they have compromised on speed. Yes, I tried the `@tf.function` decorators, and yes I tried `tf.compat.v1.disable_eager_execution()`. No matter what, TF1 was just faster.
+
+How much time did I spend you ask? Well I spent over two week trying to find a way to keep it uniformly TF2. I even raised [an issue](https://github.com/tensorflow/tensorflow/issues/40631#) to Tensorflow. But at the end, for the sake of speed, I sadly had no choice but go with TF1.
+
+To prove my point further, here is a benchmark comparing TF1, TF2 and PyTorch. Here are the results run only on my CPU,
+
+|**Framework**|TF1|TF2|PyTorch|
+|---|---|---|---|
+|**Time (s)**|9.32|258|42|
+
+Although it would have increased the speeds, I did not build and install tensorflow. The above benchmarks are for 1 epoch of the DQN algorithm.
 
 ## Usage
 
