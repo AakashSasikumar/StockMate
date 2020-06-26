@@ -9,7 +9,7 @@ A python based tool to build agents and models for stock price forecasting and t
 1. [What is StockMate?](#What-is-StockMate)
     - [Terminology](#Terminology)
     - [UI](#UI)
-    - [FrameWorks](#Frameworks)
+    - [Frameworks](#Frameworks)
     - [Planned Features](#Planned-Features)
 2. [Usage](#Usage)
     - [Installation and Setup](#Installation-and-Setup)
@@ -175,7 +175,7 @@ constituents = indices["type"][category][index]
 for stock in constituents:
     source.saveIntraDay(stock, savePath="DataStore/StockData/)
 
-# The above method saved the stock data in that location directly
+# The above method saves the stock data in that location directly
 ```
 
 - AutoRotate is a feature that takes a list of api keys and rotates them so that the daily limit can be breached. It also scrapes a list of proxy addresses so that AlphaVantage doesn't block the source IP.
@@ -213,7 +213,8 @@ model.buildModel(learningRate=1e-5)
 model.train(validationSplit=0.9, epochs=1000, batchSize=64)
 # By default, models will save in DataStore/SavedModels/
 model.saveModel("waveNetTest")
-# saved models can be loaded again by calling model.loadModel("name") and trained/inferenced upon
+# saved models can be loaded again by calling 
+# model.loadModel("name") and trained/inferenced upon
 ```
 
 ### Agent Creation
