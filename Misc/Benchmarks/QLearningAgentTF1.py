@@ -41,28 +41,34 @@ class DQN:
         tf.reset_default_graph()
         self.sess = tf.Session()
 
-        self.input = tf.placeholder(name="stateInput", dtype=tf.float32, shape=[None, self.lookBack])
-        self.target = tf.placeholder(name="target", dtype=tf.float32, shape=[None, self.actionSize])
+        self.input = tf.placeholder(
+            name="stateInput", dtype=tf.float32, shape=[None, self.lookBack])
+        self.target = tf.placeholder(name="target", dtype=tf.float32, shape=[
+                                     None, self.actionSize])
 
         inputLayer = tf.layers.dense(self.input, 256, activation=tf.nn.relu)
         self.modelOut = tf.layers.dense(inputLayer, self.actionSize)
 
         self.costFunc = tf.reduce_mean(tf.square(self.target - self.modelOut))
-        self.optimizer = tf.train.GradientDescentOptimizer(1e-5).minimize(self.costFunc)
+        self.optimizer = tf.train.GradientDescentOptimizer(
+            1e-5).minimize(self.costFunc)
         self.sess.run(tf.global_variables_initializer())
 
     def getAction(self, state):
         if random.random() <= self.epsilon:
             return random.randrange(self.actionSize)
         else:
-            return np.argmax(self.sess.run(self.modelOut, feed_dict={self.input: state})[0])
+            return np.argmax(self.sess.run(self.modelOut,
+                             feed_dict={self.input: state})[0])
 
     def createDataset(self):
         tmp = self.data.copy()
         tmp = tmp.diff(1).dropna().values
-        shape = tmp.shape[:-1] + (tmp.shape[-1] - self.lookBack + 1, self.lookBack)
+        shape = tmp.shape[:-1] + \
+            (tmp.shape[-1] - self.lookBack + 1, self.lookBack)
         strides = tmp.strides + (tmp.strides[-1],)
-        self.dataset = np.lib.stride_tricks.as_strided(tmp, shape=shape, strides=strides)
+        self.dataset = np.lib.stride_tricks.as_strided(
+            tmp, shape=shape, strides=strides)
 
     def handleAction(self, action, currentPrice):
         # buy action
@@ -92,7 +98,8 @@ class DQN:
             states = np.array([item[0] for item in batchData])
             newStates = np.array([item[3] for item in batchData])
             Q = self.sess.run(self.modelOut, feed_dict={self.input: states})
-            QNext = self.sess.run(self.modelOut, feed_dict={self.input: newStates})
+            QNext = self.sess.run(self.modelOut, feed_dict={
+                                  self.input: newStates})
             for i in range(len(batchData)):
                 state, action, reward, nextState, notProfitable = batchData[i]
                 target = Q[i]
@@ -102,8 +109,8 @@ class DQN:
 
                 X[i] = state
                 Y[i] = target
-            cost, _ = self.sess.run([self.costFunc, self.optimizer], feed_dict={self.input: X,
-                                                                            self.target: Y})
+            cost, _ = self.sess.run([self.costFunc, self.optimizer],
+                                    feed_dict={self.input: X, self.target: Y})
             if self.epsilon > self.epsilonMin:
                 self.epsilon *= self.epsilonDecay
 
@@ -121,7 +128,8 @@ class DQN:
                 reward = self.getReward(action, currentPrice)
 
                 notProfitable = self.money < self.initialMoney
-                self.memory.append((currentState, action, reward, nextState, notProfitable))
+                self.memory.append(
+                    (currentState, action, reward, nextState, notProfitable))
 
                 self.updateWeights()
             if epoch % logFreq == 0:
@@ -136,7 +144,8 @@ class DQN:
         for timeStep in tqdm.tqdm(range(self.lookBack, len(self.data)-1)):
             state = self.dataset[timeStep-self.lookBack]
 
-            action = np.argmax(self.sess.run(self.modelOut, feed_dict={self.input: state.reshape(1, -1)})[0])
+            action = np.argmax(self.sess.run(self.modelOut, feed_dict={
+                               self.input: state.reshape(1, -1)})[0])
 
             self.handleAction(action, data[timeStep])
         profitPerc = (self.profit / self.initialMoney) * 100
