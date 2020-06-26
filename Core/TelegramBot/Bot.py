@@ -61,8 +61,8 @@ def start(update, context):
     elif chatID == root:
         suffix = ("If you have subscribed to any trading agents, "
                   "I will send you updates on when to buy and sell."
-                  "Also, I will give you updates on any train jobs"
-                  "you may have set")
+                  " Also, I will give you updates on any train jobs"
+                  " you may have set")
     elif chatID != root:
         suffix = ("Looks like you are not the root user. If you want"
                   " to become root, click on the reset root button on"

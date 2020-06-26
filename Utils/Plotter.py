@@ -106,9 +106,9 @@ def getAgentPredictionFigure(ticker, data, prediction, plotType):
     figure.add_trace(basePlot)
     for plot in predictionPlots:
         figure.add_trace(plot)
-    figure.update_layout(autosize=False,
-                         height=700,
-                         width=1100,
+    figure.update_layout(autosize=True,
+                        #  height=700,
+                        #  width=1100,
                          title=ticker,
                          showlegend=True,
                          dragmode="pan")

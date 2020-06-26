@@ -6,28 +6,16 @@ A python based tool to build agents and models for stock price forecasting and t
 
 ## Table of Contents
 
-1. [Getting Started](#Getting-Started)
-    - [Prerequisites](#Prerequisites)
-2. [What is StockMate?](#What-is-StockMate)
+1. [What is StockMate?](#What-is-StockMate)
     - [Terminology](#Terminology)
-    - [Features](#Features)
+    - [UI](#UI)
+    - [FrameWorks](#Frameworks)
     - [Planned Features](#Planned-Features)
-3. [Usage](#Usage)
+2. [Usage](#Usage)
     - [Installation and Setup](#Installation-and-Setup)
     - [Saving Stock Data](#Saving-Stock-Data)
     - [Forecaster Creation](#Forecaster-Creation)
-
-## Getting Started
-
-### Prerequisites
-
-1. plotly
-2. selenium
-3. phantomjs driver
-4. tensorflow 2.0 or greater
-    - As of June 5th 2020, tensorflow 2.0 has an error when loading a saved model containing LSTM layers. So the workaround for this is to install tf-nightly as they have patched this in this version.
-5. lxml
-6. python-telegram-bot
+    - [Agent Creation](#Agent-Creation)
 
 ## What is StockMate
 
@@ -37,17 +25,17 @@ StockMate is a Python based tool where you can create models for stock price pre
 
 #### 1. Forecasters
 
-Forecasters are a regression models for predicting stock prices. Forecasters can be trained for individual stocks or for entire indices. Basic models have been implemented already and can be used out of the box. There are 3 main parameters for forecasters ie,
-
-1. `Stock Data` - Some of the models support multivariate data, to make sure, check the documentation for each model
-2. `forecast` - The number of days in the future for which prices are to be predicted
-3. `lookBack` - The number of days to be used to make `forecast` predictions.
-
-Using this forecast information, we can make decisions on whether to buy to sell stocks.
+Forecasters are a regression models for predicting stock prices. Forecasters can be trained for individual stocks or for entire indices. Basic models have been implemented already and can be used out of the box.
 
 #### 2. Agents
 
 Agents are used to automate trading. Agents decide when to buy, sell or hold stock. Currently there are no free trading apis, so the next best solution for automated trading is to make a chatbot that tells you when to buy and sell.
+
+#### 3. Other Things to Know
+
+1. `forecast` - The number of days in the future for which prices are to be predicted
+2. `lookBack` - The number of days to be used to make `forecast` predictions.
+3. `interval` - To specify what kind of data the model is going to train on. 1 day interval data or 5 minute intervals, 1 minute intervals ...
 
 #### 3. Data Processing Framework (DPF)
 
@@ -65,19 +53,28 @@ These two functionalities have been abstracted out of the model and incorporated
 
 Please check the documentation under `Core.DataProcessor` to see what the parameters that are passed into it and what the expected outputs are.
 
-Also, two DPFs have already been implemented for handing univariate and multivariate stock data respectively. You can find them under `Examples/Processors/BasicProcessors.py`
+Also, a few DPFs have already been implemented for handing univariate and multivariate stock data respectively. You can find them under `Examples/Processors/BasicProcessors.py`
 
-### Features
+### UI
 
 Currently, the implemented features for StockMate include
 
-1. Frameworks for Forecaster and Agent creation
-2. Framework for stock data retrieval with proxy rotation
-3. A fully fledged web UI viewing models and managing agent subscriptions
-    - I have no skills in making good UIs or websites; I shamelessly copied [an open source dashboard](https://github.com/BlackrockDigital/startbootstrap-sb-admin-2).
-4. A tool for updating NSE Indices
+#### UI Forecaster Creation
 
+![UIForecasterCreation](Images/UIForecasterCreation.png)
+
+#### Viewing Forecasters
+
+![UIViewingForecasters](Images/UIViewingForecasters.png)
 The following models have been implemented,
+
+### Viewing Agent Actions
+
+![UIViewingAgentActions](Images/UIViewingAgentActions.png)
+
+### Chatbot Features
+
+![BotShowcase](Images/BotShowcase.png)
 
 #### Forecasters
 
@@ -91,7 +88,12 @@ The following models have been implemented,
 #### Agents
 
 1. QLearning.BasicDQN
-2. QLearning.WaveNetDQN
+
+### Frameworks
+
+1. A Framework for creating forecaster models
+2. Framework for agent creation
+3. Data processing framework
 
 ### Planned Features
 
@@ -101,6 +103,16 @@ The following models have been implemented,
 4. Implementation of additional forecasters and agents
 
 ## Usage
+
+### Prerequisites
+
+1. plotly
+2. selenium
+3. phantomjs driver
+4. tensorflow 2.0 or greater
+    - As of June 5th 2020, tensorflow 2.0 has an error when loading a saved model containing LSTM layers. So the workaround for this is to install tf-nightly as they have patched this in this version.
+5. lxml
+6. python-telegram-bot
 
 ### Installation and Setup
 
@@ -188,8 +200,12 @@ forecast = 5
 
 # target feature is the feature that we want to predict
 # in this case it is the closing price
-dpf = MultiVarProcessor(tickers=constituents, features=["Open", "High", "Low", "Close", "Volume"],
-lookBack=lookBack, forecast=forecast, targetFeature="Close", isSeq2Seq=True)
+dpf = MultiVarProcessor(tickers=constituents, features=["Open", "High",
+                                                        "Low", "Close",
+                                                        "Volume"],
+                        lookBack=lookBack, forecast=forecast,
+                        targetFeature="Close", interval="1d",
+                        isSeq2Seq=True)
 
 model = WaveNet()
 model.assignDataProcessor(dpf)
@@ -198,4 +214,25 @@ model.train(validationSplit=0.9, epochs=1000, batchSize=64)
 # By default, models will save in DataStore/SavedModels/
 model.saveModel("waveNetTest")
 # saved models can be loaded again by calling model.loadModel("name") and trained/inferenced upon
+```
+
+### Agent Creation
+
+```python
+from Examples.Processors import DQNProcessor
+from Models.Agents.QLearning import BasicDQN
+
+dpf = DQNProcessor(tickers=["IOC"], features=["Close"],
+                   lookBack=30, interval="1d")
+
+agent = BasicDQN(initialMoney=10000, gamma=0.95,
+                 epsilon=0.5, epsilonDecay=0.99,
+                 epsilonMin=0.01, batchSize=32)
+
+agent.assignDataProcessor(dpf)
+agent.buildModel(learningRate=1e-5)
+agent.train(epochs=200)
+agent.saveModel("basicAgent")
+# This model can now be viewed in the UI, or you may
+# choose to plot it yourself
 ```
