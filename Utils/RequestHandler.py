@@ -22,7 +22,7 @@ def saveTelegramAPIKey(apiKey):
         The telegram bot api key
     """
     saveDict = {"apiKey": apiKey}
-    with open("telegramAPIData.json", "w+") as f:
+    with open("DataStore/Configs/telegramAPIData.json", "w+") as f:
         json.dump(saveDict, f)
 
 
@@ -32,10 +32,10 @@ def resetTelegramRoot():
     This method will delete the chatID of the root user, so as
     to be able to reset it.
     """
-    if "telegramAPIData.json" not in os.listdir():
+    if "telegramAPIData.json" not in os.listdir("DataStore/Configs/"):
         return
 
-    with open("telegramAPIData.json") as f:
+    with open("DataStore/Configs/telegramAPIData.json") as f:
         apiData = json.load(f)
 
     if "rootID" not in apiData.keys():
@@ -43,7 +43,7 @@ def resetTelegramRoot():
 
     # only saves the apiKey, and effectively removing rootID
     saveTelegramAPIKey(apiData["apiKey"])
-    tbot.restRoot()
+    tbot.resetRoot()
 
 
 def createForecaster(modelData):

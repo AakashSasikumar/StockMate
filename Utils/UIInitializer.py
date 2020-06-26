@@ -218,10 +218,10 @@ def getAllFeatures():
 
 
 def getTelegramAPIKey():
-    if "telegramAPIData.json" not in os.listdir():
+    if "telegramAPIData.json" not in os.listdir("DataStore/Configs/"):
         return False
     else:
-        with open("telegramAPIData.json") as f:
+        with open("DataStore/Configs/telegramAPIData.json") as f:
             return json.load(f)["apiKey"]
 
 

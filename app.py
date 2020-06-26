@@ -19,7 +19,7 @@ websiteName = "StockMate"
 
 def init():
     uint.init()
-    if "telegramAPIData.json" in os.listdir():
+    if "telegramAPIData.json" in os.listdir("DataStore/Configs/"):
         tbot.init()
         tbot.startListening()
     jobs.init()

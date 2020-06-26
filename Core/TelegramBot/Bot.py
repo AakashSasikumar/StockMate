@@ -14,7 +14,7 @@ def init():
     """
     global root, updater, apiData
 
-    with open("telegramAPIData.json") as f:
+    with open("DataStore/Configs/telegramAPIData.json") as f:
         apiData = json.load(f)
 
     updater = Updater(apiData["apiKey"], use_context=True)
@@ -103,7 +103,7 @@ def saveRoot(chatID):
     global root
     root = chatID
 
-    with open("telegramAPIData.json", "w+") as f:
+    with open("DataStore/Configs/telegramAPIData.json", "w+") as f:
         apiData["rootID"] = chatID
         json.dump(apiData, f)
 
@@ -135,8 +135,8 @@ def resetRoot():
     executed.
     """
     global root
-    root = None
     sendMessage("Root has been reset. You are not the root anymore")
+    root = None
 
 
 def retrainLastModel(update, context):
