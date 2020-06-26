@@ -109,13 +109,13 @@ Well yes. The Forecasters use TF2 and Agents use TF1. I tried implementing RL al
 
 How much time did I spend you ask? Well I spent over two week trying to find a way to keep it uniformly TF2. I even raised [an issue](https://github.com/tensorflow/tensorflow/issues/40631#) to Tensorflow. But at the end, for the sake of speed, I sadly had no choice but go with TF1.
 
-To prove my point further, here is a benchmark comparing TF1, TF2 and PyTorch. Here are the results run only on my CPU,
+To prove my point further, here is a benchmark comparing TF1, TF2 and PyTorch. The benchmark was run only on CPU for 1 epoch of DQN.
 
 |**Framework**|TF1|TF2|PyTorch|
 |---|---|---|---|
 |**Time (s)**|9.32|258|42|
 
-Although it would have increased the speeds, I did not build and install tensorflow. The above benchmarks are for 1 epoch of the DQN algorithm.
+Although it would have increased the speeds, I did not build and install Tensorflow.
 
 ## Usage
 
