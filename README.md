@@ -139,11 +139,25 @@ python -m venv stockmate
 source stockmate/bin/activate
 ```
 
-Installing all the python dependencies dependencies,
+1. Installing all the python dependencies dependencies,
 
-```bash
-pip install plotly tensorflow lxml selenium flask python-telegram-bot
-```
+    ```bash
+    pip install plotly tensorflow lxml selenium flask python-telegram-bot
+    ```
+
+2. Clone this repository to some location
+
+    ```
+    git clone https://github.com/AakashSasikumar/StockMate.git
+    ```
+
+3. Start the flask server
+
+    ```
+    python app.py
+    ```
+
+4. Go to the Manage Subscriptions page and set up a Telegram Bot for yourself by following the instructions listed
 
 ### Saving Stock Data
 
