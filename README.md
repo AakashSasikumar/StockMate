@@ -1,8 +1,8 @@
 # StockMate
 
-A python based tool to build agents and models for stock price forecasting and trade automation.
+A python based tool to build agents and forecasters for stock price forecasting and trade automation.
 
-`StockMate` is just a temporary name, will change it once I come up with a better one.
+`StockMate` is just a temporary name, I'll change it once I come up with a better one.
 
 ## Table of Contents
 
@@ -20,34 +20,28 @@ A python based tool to build agents and models for stock price forecasting and t
 
 ## What is StockMate
 
-StockMate is a Python based tool where you can create models for stock price prediction and trade automation. Using StockMate you can use the provided APIs to get the latest stock data, build and test models for forecasting, etc. Currently StockMate's data retrieval is built around India's National Stock Exchange (NSE), and support for other exchanges isn't built yet.
+StockMate is a Python based tool where you can create models for stock price prediction and trade automation. Using StockMate you can use the provided frameworks to get the latest stock data, build and test models for forecasting, etc. Currently StockMate's data retrieval is built around India's National Stock Exchange (NSE), and support for other exchanges haven't been built.
 
 ### Terminology
 
 #### 1. Forecasters
 
-Forecasters are a regression models for predicting stock prices. Forecasters can be trained for individual stocks or for entire indices. Basic models have been implemented already and can be used out of the box.
+Forecasters are regression models for predicting stock prices. Forecasters can be trained for individual stocks or for entire indices. A few forecasters have been implemented already and can be used out of the box.
 
 #### 2. Agents
 
-Agents are used to automate trading. Agents decide when to buy, sell or hold stock. Currently there are no free trading apis, so the next best solution for automated trading is to make a chatbot that tells you when to buy and sell.
-
-#### 3. Other Things to Know
-
-1. `forecast` - The number of days in the future for which prices are to be predicted
-2. `lookBack` - The number of days to be used to make `forecast` predictions.
-3. `interval` - To specify what kind of data the model is going to train on. 1 day interval data or 5 minute intervals, 1 minute intervals ...
+Agents are used to automate trading. Agents decide when to buy, sell, or hold stock. Currently there are no free trading apis, so the next best solution for automated trading is to make a chatbot that tells you when to buy and sell.
 
 #### 3. Data Processing Framework (DPF)
 
-The Data Processing Framework was something that had to be build to make the created models more portable. Think of the model as a black box; Each model will have its own way of handling,
+The Data Processing Framework was something that had to be built to make the models more portable. Think of the model as a black box; Each model can have its own way of handling
 
 1. The incoming raw stock data
-    - Maybe this raw data is normalized, or some other operations are applied to it before being fed to the model
+    - Operations like normalization, etc, could be applied to the raw stock data before being fed to the model
 2. The model output
-    - The the input was normalized for a regressor, the model output would have to be de-normalized to get back the predicted prices
+    - The model output could be the normalized price values, which then have to get converted back to the original prices
 
-These two functionalities have been abstracted out of the model and incorporated into a `Data Processing Framework (DPF)`. Basically what this means is that, to create a model you would have define your own DPF by inheriting `Core.DataProcessor` and overriding the following methods,
+These two functions have been abstracted out of the model and incorporated into a `Data Processing Framework (DPF)`. Basically what this means is that, to create a model you would have define your own DPF by inheriting `Core.DataProcessor` and overriding the following methods,
 
 1. `inputProcessor()`
 2. `outputProcessor()`
@@ -55,6 +49,13 @@ These two functionalities have been abstracted out of the model and incorporated
 Please check the documentation under `Core.DataProcessor` to see what the parameters that are passed into it and what the expected outputs are.
 
 Also, a few DPFs have already been implemented for handing univariate and multivariate stock data respectively. You can find them under `Examples/Processors/BasicProcessors.py`
+
+#### 4. Other Things to Know
+
+1. `forecast` - The number of days in the future for which prices are to be predicted
+2. `lookBack` - The number of days to be used to make `forecast` predictions.
+3. `interval` - To specify what kind of data the model is going to train on. 1 day interval data or 5 minute intervals, 1 minute intervals ...
+
 
 ### UI
 
@@ -105,7 +106,7 @@ The following models have been implemented,
 
 ### WTF? TF1 and TF2 Together?
 
-Well yes. The Forecasters use TF2 and Agents use TF1. I tried implementing RL algorithms in TF2, but for the sake of easier coding they have compromised on speed. Yes, I tried the `@tf.function` decorators, and yes I tried `tf.compat.v1.disable_eager_execution()`. No matter what, TF1 was just faster.
+Well yes. The Forecasters use TF2 and Agents use TF1. After going through pages of Tensorflow documentation, it looks like they have compromised on speed for the sake of better looking code. Yes, I tried the `@tf.function` decorators, and yes I tried `tf.compat.v1.disable_eager_execution()`. No matter what, TF1 was just faster.
 
 How much time did I spend you ask? Well I spent over two week trying to find a way to keep it uniformly TF2. I even raised [an issue](https://github.com/tensorflow/tensorflow/issues/40631#) to Tensorflow. But at the end, for the sake of speed, I sadly had no choice but go with TF1.
 
@@ -115,7 +116,7 @@ To prove my point further, here is a benchmark comparing TF1, TF2 and PyTorch. T
 |---|---|---|---|
 |**Time (s)**|9.32|258|42|
 
-Although it would have increased the speeds, I did not build and install Tensorflow.
+Although it would have increased the speeds, I did not build and install Tensorflow locally.
 
 ## Usage
 
